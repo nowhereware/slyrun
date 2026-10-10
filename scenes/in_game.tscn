@@ -1,0 +1,101 @@
+[gd_scene format=3 uid="uid://4d37074pw4oh"]
+
+[ext_resource type="Script" uid="uid://bys53hkt5n4c7" path="res://scripts/in_game.gd" id="1_7nptk"]
+[ext_resource type="Texture2D" uid="uid://brm7xv58784sd" path="res://assets/temp_fox.png" id="2_cela1"]
+[ext_resource type="LabelSettings" uid="uid://b5fy2cfuqd5dr" path="res://assets/label_settings.tres" id="2_ipuqq"]
+[ext_resource type="FontFile" uid="uid://vqnlwy3s5bfc" path="res://assets/courierprime.ttf" id="3_h5xqe"]
+[ext_resource type="Texture2D" uid="uid://jn2wxo8npxc0" path="res://assets/temp_scroll.png" id="4_5gm6p"]
+
+[sub_resource type="SpriteFrames" id="SpriteFrames_h5xqe"]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("2_cela1")
+}],
+"loop": 1,
+"name": &"default",
+"speed": 5.0
+}]
+
+[sub_resource type="LabelSettings" id="LabelSettings_ipuqq"]
+font = ExtResource("3_h5xqe")
+font_size = 49
+
+[sub_resource type="LabelSettings" id="LabelSettings_5gm6p"]
+font = ExtResource("3_h5xqe")
+font_size = 32
+
+[sub_resource type="LabelSettings" id="LabelSettings_h5xqe"]
+font = ExtResource("3_h5xqe")
+font_size = 32
+
+[node name="InGame" type="Node2D" unique_id=707985964]
+script = ExtResource("1_7nptk")
+
+[node name="Sky" type="Parallax2D" parent="." unique_id=2108714000]
+visible = false
+scroll_scale = Vector2(0.1, 0.1)
+repeat_size = Vector2(1920, 1080)
+autoscroll = Vector2(-25, 0)
+repeat_times = 2
+
+[node name="Sprite2D" type="Sprite2D" parent="Sky" unique_id=1097274910]
+position = Vector2(658, 136)
+texture = ExtResource("4_5gm6p")
+
+[node name="Ground" type="Parallax2D" parent="." unique_id=970831227]
+
+[node name="Fox" type="AnimatedSprite2D" parent="." unique_id=1399206653]
+visible = false
+position = Vector2(924, 519)
+sprite_frames = SubResource("SpriteFrames_h5xqe")
+
+[node name="TimerLabel" type="Label" parent="." unique_id=1266347697]
+offset_left = 546.0
+offset_top = 10.0
+offset_right = 642.0
+offset_bottom = 46.0
+text = "99:99"
+label_settings = ExtResource("2_ipuqq")
+
+[node name="CurrentWord" type="RichTextLabel" parent="." unique_id=247813977]
+offset_left = 515.0
+offset_top = 129.0
+offset_right = 738.0
+offset_bottom = 179.0
+bbcode_enabled = true
+fit_content = true
+
+[node name="GameOverUI" type="Control" parent="." unique_id=759016216]
+visible = false
+layout_mode = 3
+anchors_preset = 0
+offset_right = 40.0
+offset_bottom = 40.0
+
+[node name="GameOverText" type="Label" parent="GameOverUI" unique_id=1405738786]
+layout_mode = 0
+offset_left = 429.0
+offset_top = 130.0
+offset_right = 865.0
+offset_bottom = 319.0
+text = "Game Over!"
+label_settings = SubResource("LabelSettings_ipuqq")
+
+[node name="WPMLabel" type="Label" parent="GameOverUI" unique_id=725878610]
+layout_mode = 0
+offset_left = 235.0
+offset_top = 283.0
+offset_right = 617.0
+offset_bottom = 319.0
+text = "Words per Minute: "
+label_settings = SubResource("LabelSettings_5gm6p")
+
+[node name="AccuracyLabel" type="Label" parent="GameOverUI" unique_id=402973759]
+layout_mode = 0
+offset_left = 389.0
+offset_top = 335.0
+offset_right = 581.0
+offset_bottom = 371.0
+text = "Accuracy: "
+label_settings = SubResource("LabelSettings_h5xqe")

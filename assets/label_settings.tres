@@ -1,0 +1,7 @@
+[gd_resource type="LabelSettings" format=3 uid="uid://b5fy2cfuqd5dr"]
+
+[ext_resource type="FontFile" uid="uid://vqnlwy3s5bfc" path="res://assets/courierprime.ttf" id="1_55lj5"]
+
+[resource]
+font = ExtResource("1_55lj5")
+font_size = 32
