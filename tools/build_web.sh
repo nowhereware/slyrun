@@ -1,15 +1,22 @@
 #!/usr/bin/env bash
 # Exports the "Web" preset into site/play/, next to the website in site/index.html.
-# Usage: tools/build_web.sh   (set GODOT to use a different Godot binary)
+# Usage: tools/build_web.sh   (set GODOT to use a specific Godot binary)
 set -euo pipefail
 
 cd "$(dirname "$0")/.."
 
-GODOT="${GODOT:-/Applications/Godot.app/Contents/MacOS/Godot}"
+# GODOT wins; otherwise `godot` on PATH (how CI installs it), then the default macOS install.
+if [[ -z "${GODOT:-}" ]]; then
+	if command -v godot >/dev/null 2>&1; then
+		GODOT="$(command -v godot)"
+	else
+		GODOT="/Applications/Godot.app/Contents/MacOS/Godot"
+	fi
+fi
 OUT_DIR="site/play"
 
 if [[ ! -x "$GODOT" ]]; then
-	echo "build_web: Godot not found at '$GODOT'. Install Godot 4.7.x or set GODOT to its binary." >&2
+	echo "build_web: Godot not found at '$GODOT'. Install Godot 4.7.x, put it on PATH as 'godot', or set GODOT to its binary." >&2
 	exit 1
 fi
 

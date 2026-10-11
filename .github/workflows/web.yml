@@ -1,0 +1,75 @@
+name: Web build
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+env:
+  GODOT_VERSION: 4.7.2
+  GODOT_RELEASE: 4.7.2-stable
+
+jobs:
+  build:
+    name: Export web build
+    runs-on: ubuntu-24.04
+    defaults:
+      run:
+        # Explicit bash turns on pipefail, so a failure before `| tee` still fails the step.
+        shell: bash
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Cache Godot and web export templates
+        id: godot-cache
+        uses: actions/cache@v4
+        with:
+          path: |
+            ~/godot
+            ~/.local/share/godot/export_templates/${{ env.GODOT_VERSION }}.stable
+          key: godot-${{ env.GODOT_RELEASE }}-web-${{ runner.os }}
+
+      - name: Download Godot and web export templates
+        if: steps.godot-cache.outputs.cache-hit != 'true'
+        run: |
+          base="https://github.com/godotengine/godot/releases/download/${GODOT_RELEASE}"
+          templates="$HOME/.local/share/godot/export_templates/${GODOT_VERSION}.stable"
+          mkdir -p ~/godot "$templates"
+          curl -sSL --fail -o /tmp/godot.zip "$base/Godot_v${GODOT_RELEASE}_linux.x86_64.zip"
+          unzip -q -o /tmp/godot.zip -d ~/godot
+          mv ~/godot/"Godot_v${GODOT_RELEASE}_linux.x86_64" ~/godot/godot
+          chmod +x ~/godot/godot
+          # The template archive covers every platform (1.3 GB); keep only the web ones.
+          curl -sSL --fail -o /tmp/templates.tpz "$base/Godot_v${GODOT_RELEASE}_export_templates.tpz"
+          unzip -q -j -o /tmp/templates.tpz 'templates/version.txt' 'templates/web_*' -d "$templates"
+          rm /tmp/godot.zip /tmp/templates.tpz
+
+      - name: Put Godot on PATH
+        run: echo "$HOME/godot" >> "$GITHUB_PATH"
+
+      - name: Import assets
+        run: godot --headless --path . --import 2>&1 | tee import.log
+
+      - name: Export web build
+        run: tools/build_web.sh 2>&1 | tee build.log
+
+      - name: Fail on Godot errors
+        run: |
+          if grep -n "ERROR" import.log build.log; then
+            echo "::error::Godot printed ERROR lines during import or export (listed above)."
+            exit 1
+          fi
+          if [[ ! -f site/play/index.pck ]]; then
+            echo "::error::site/play/index.pck is missing after the export."
+            exit 1
+          fi
+
+      - name: Upload site
+        uses: actions/upload-artifact@v4
+        with:
+          name: site
+          path: site/
+          if-no-files-found: error
