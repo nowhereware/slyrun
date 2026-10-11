@@ -26,6 +26,8 @@ mono_crash.*.json
 
 # Web export output (see export_presets.cfg)
 build/
+# Game export copied into the website by tools/build_web.sh
+site/play/
 
 # OS / tooling
 .DS_Store

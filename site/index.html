@@ -1,0 +1,913 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<meta name="description" content="Type to keep Sly the fox ahead of the Hollow. A typing runner that tunes itself to your speed.">
+<meta property="og:title" content="Slyrun">
+<meta property="og:description" content="Type to keep Sly the fox ahead of the Hollow. A typing runner that tunes itself to your speed.">
+<title>Slyrun</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600&display=swap">
+<style>
+@view-transition{navigation:auto}
+/* Layout: one pinned stage. Scrolling drives keyboard -> flying keys -> SLYRUN logo -> Sly on the ground. */
+:root{
+  --paper:#FFFFFF;
+  --ink:#1E1B19;
+  --case:#111111;
+  --bezel:#2A2A2A;
+  --cap-top:#272727;
+  --cap-bot:#1B1B1B;
+  --cap-lip:#0F0F0F;
+  --legend:#D2CFCB;
+  --legend-dim:#8E8A86;
+  --orange:#DA4B12;
+  --orange-hi:#EC5F22;
+  --orange-lo:#A8380B;
+  --orange-ink:#C2410C;
+  --key-letter:#FFF5EC;
+  --soil:#5A3216;
+  --nav:#454341;
+  --nav-ink:#F4F1EE;
+  --muted:#5E5954;
+  --line:#E6E2DD;
+  --tint:#F7F5F2;
+  --night:#0E0D0C;
+  --cream:#F3E9DD;
+  --cream-dim:#D2BFAC;
+  --font-ui:'IBM Plex Mono',ui-monospace,'SFMono-Regular',Menlo,Consolas,monospace;
+  color-scheme:light;
+}
+html,body{background:var(--paper);color:var(--ink)}
+body{font-family:var(--font-ui);-webkit-font-smoothing:antialiased}
+[hidden]{display:none!important}
+.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
+
+.track{position:relative;height:290vh}
+.stage{position:sticky;top:env(safe-area-inset-top,0px);height:100vh;height:100svh;overflow:hidden;background:var(--paper)}
+
+/* Nav */
+.nav{position:fixed;top:0;left:0;right:0;z-index:60;height:52px;padding-top:env(safe-area-inset-top,0px);display:flex;align-items:center;justify-content:center;background:var(--nav);color:var(--nav-ink);opacity:0;visibility:hidden;transform:translateY(-100%);will-change:transform,opacity}
+.nav ul{list-style:none;margin:0;padding:0;display:flex;gap:28px;font-size:15px}
+.nav a.play{color:#F7A06B}
+@media (max-width:520px){.nav ul{gap:16px;font-size:13px}}
+.nav a{color:var(--nav-ink);text-decoration:none;padding:6px 2px;border-bottom:1.5px solid transparent}
+.nav a[aria-current="page"]{border-bottom-color:var(--nav-ink)}
+.nav a:hover{border-bottom-color:var(--orange-hi)}
+.nav a:focus-visible,.profile:focus-visible,.start:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
+.profile{position:absolute;right:16px;top:50%;transform:translateY(-50%);width:36px;height:36px;padding:0;border:0;background:none;color:var(--nav-ink);cursor:pointer;display:grid;place-items:center;border-radius:50%}
+.profile svg{width:30px;height:30px}
+
+/* Keyboard */
+.kb{position:absolute;left:50%;top:0;z-index:10;border-radius:calc(var(--u)*.32);background:var(--case);box-shadow:inset 0 0 0 calc(var(--u)*.07) #1A1A1A,inset 0 0 0 calc(var(--u)*.085) var(--bezel),0 calc(var(--u)*.08) 0 #070707,0 40px 70px -28px rgba(20,12,8,.55);transform-origin:50% 50%;will-change:transform,opacity}
+.key{position:absolute;border-radius:calc(var(--u)*.13);background:linear-gradient(180deg,var(--cap-top),var(--cap-bot));box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 calc(var(--u)*-.075) 0 var(--cap-lip),0 calc(var(--u)*.035) 0 #080808;color:var(--legend)}
+.key::before{content:"";position:absolute;left:8%;right:8%;top:5%;bottom:16%;border-radius:calc(var(--u)*.09);background:linear-gradient(180deg,rgba(255,255,255,.035),rgba(255,255,255,0));pointer-events:none}
+.key .m{position:absolute;inset:0 0 10% 0;display:flex;align-items:center;justify-content:center;font-size:calc(var(--u)*.27);font-weight:400;letter-spacing:.02em}
+.key.num .m{font-size:calc(var(--u)*.36);font-weight:300;padding-top:calc(var(--u)*.1)}
+.key .t{position:absolute;top:12%;left:0;right:0;text-align:center;font-size:calc(var(--u)*.14);color:var(--legend-dim)}
+.key.fn .m{font-size:calc(var(--u)*.14);color:var(--legend-dim)}
+.key .tl{position:absolute;top:13%;left:14%;font-size:calc(var(--u)*.17);color:var(--legend)}
+.key .bl{position:absolute;bottom:22%;left:14%;font-size:calc(var(--u)*.13);color:var(--legend-dim);letter-spacing:.03em}
+.key.arrow .m{font-size:calc(var(--u)*.34);font-weight:300}
+.key .home{position:absolute;left:38%;right:38%;bottom:24%;height:calc(var(--u)*.035);border-radius:2px;background:#3A3A3A}
+.slot{position:absolute;border-radius:calc(var(--u)*.11);background:var(--paper);box-shadow:inset 0 calc(var(--u)*.04) calc(var(--u)*.06) rgba(0,0,0,.18)}
+.knob{display:flex;align-items:center;justify-content:center}
+.knob .dial{width:calc(var(--u)*.84);height:calc(var(--u)*.84);border-radius:50%;background:radial-gradient(circle at 42% 34%,#3B3B3B,#151515 68%);box-shadow:inset 0 0 0 calc(var(--u)*.05) #0B0B0B,0 calc(var(--u)*.05) calc(var(--u)*.1) rgba(0,0,0,.7);position:relative;margin-bottom:8%}
+.knob .dial::after{content:"";position:absolute;left:14%;right:14%;top:43%;height:16%;border-radius:calc(var(--u)*.05);background:linear-gradient(180deg,var(--orange-hi),var(--orange))}
+.strip{position:absolute;display:flex;flex-direction:column;align-items:center;justify-content:space-between;padding-block:calc(var(--u)*.22) calc(var(--u)*.5);box-sizing:border-box}
+.led{display:flex;flex-direction:column;align-items:center;gap:calc(var(--u)*.05);font-size:calc(var(--u)*.12);color:var(--legend-dim)}
+.led i{display:block;width:calc(var(--u)*.3);height:calc(var(--u)*.1);border-radius:99px;background:#ECEAE6}
+.brand{writing-mode:vertical-rl;transform:rotate(180deg);font-size:calc(var(--u)*.26);font-weight:300;color:var(--legend-dim);letter-spacing:.08em}
+
+/* Scroll hint */
+.hint{position:absolute;left:50%;z-index:12;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:6px;color:var(--orange-ink);font-size:22px;font-weight:500;will-change:opacity}
+.hint svg{width:22px;height:22px;animation:bob 1.6s ease-in-out infinite}
+@keyframes bob{0%,100%{transform:translateY(0)}50%{transform:translateY(6px)}}
+
+/* Flying keys */
+.keys{position:absolute;inset:0;z-index:20;pointer-events:none}
+.okey{position:absolute;left:0;top:0;width:var(--B);height:var(--B);border-radius:13%;background:linear-gradient(180deg,var(--orange-hi),var(--orange) 62%);box-shadow:inset 0 1px 0 rgba(255,255,255,.28),inset 0 calc(var(--B)*-.07) 0 var(--orange-lo),0 calc(2px + 16px*var(--lift,0)) calc(3px + 26px*var(--lift,0)) rgba(40,14,0,calc(.18 + .16*var(--lift,0)));display:flex;align-items:center;justify-content:center;padding-bottom:calc(var(--B)*.06);box-sizing:border-box;color:var(--key-letter);font-size:calc(var(--B)*.46);font-weight:500;transform-origin:50% 50%;will-change:transform}
+
+/* Tagline */
+.tagline{position:absolute;left:0;right:0;z-index:15;margin:0;padding-inline:16px;text-align:center;color:var(--orange-ink);font-size:clamp(18px,2vw,26px);font-weight:500;opacity:0;will-change:opacity,transform;text-wrap:balance}
+
+/* Sky behind the ground: sun, clouds, birds. Fades in with the ground. */
+.sky{position:absolute;left:0;right:0;top:0;height:100%;z-index:1;opacity:0;overflow:hidden;pointer-events:none;background:linear-gradient(180deg,#C4E1F2 0%,#DCEEF7 42%,#F4F4EA 78%,#FCEFD9 100%);will-change:opacity}
+.sun{position:absolute;right:max(20px,9vw);top:clamp(72px,12vh,132px);width:clamp(54px,7vw,104px);aspect-ratio:1;border-radius:50%;background:radial-gradient(circle at 42% 38%,#FFF6CC 0,#FFDE73 46%,#FFC544 100%);box-shadow:0 0 0 clamp(9px,1.3vw,18px) rgba(255,214,102,.24),0 0 0 clamp(20px,2.8vw,40px) rgba(255,214,102,.12),0 0 80px 24px rgba(255,196,80,.28)}
+.cloud{position:absolute;left:0;width:var(--cw,220px);animation:cloud var(--dur,120s) linear var(--delay,0s) infinite;will-change:transform}
+.cloud svg{display:block;width:100%;height:auto}
+@keyframes cloud{from{transform:translateX(-100%)}to{transform:translateX(100vw)}}
+.flock{position:absolute;left:0;width:var(--fw,110px);animation:fly var(--dur,30s) linear var(--delay,0s) infinite;will-change:transform}
+.flock.back{animation-name:flyback}
+.flock.back svg{transform:scaleX(-1)}
+.flock svg{display:block;width:100%;height:auto;overflow:visible}
+.flock .glide{animation:sway var(--sw,9s) ease-in-out infinite alternate}
+@keyframes fly{0%{transform:translateX(-100%)}60%,100%{transform:translateX(100vw)}}
+@keyframes flyback{0%{transform:translateX(100vw)}60%,100%{transform:translateX(-100%)}}
+@keyframes sway{0%{transform:translateY(10px) rotate(1.5deg)}100%{transform:translateY(-16px) rotate(-2deg)}}
+.hills{position:absolute;left:0;right:0;pointer-events:none;will-change:opacity}
+.hills svg{display:block;width:100%;height:100%}
+
+/* Ground scene */
+.scene{position:absolute;inset:0;z-index:5;will-change:transform}
+.ground{position:absolute;left:0;right:0;-webkit-mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%);mask-image:linear-gradient(180deg,#000 0,#000 60%,transparent 100%)}
+.ground svg,.cta-ground svg{display:block;width:100%;height:100%}
+.fox{position:absolute;left:50%;transform-origin:50% 100%;will-change:transform,opacity}
+.fox svg{display:block;width:100%;height:100%;overflow:visible}
+.fox.hop{animation:hop .55s cubic-bezier(.3,.7,.4,1)}
+@keyframes hop{0%{translate:0 0}40%{translate:0 -38%}70%{translate:0 0}85%{translate:0 -6%}100%{translate:0 0}}
+/* Sly idles: tail wags, head looks around, ears twitch, eyes blink, chest breathes */
+.fx-all,.fx-tail,.fx-head,.fx-ear,.fx-ear2{transform-box:view-box}
+.fx-all{transform-origin:140px 231px;animation:fxbreathe 3.6s ease-in-out infinite}
+.fx-tail{transform-origin:124px 220px;animation:fxwag 2.8s ease-in-out infinite}
+.fx-head{transform-origin:188px 98px;animation:fxlook 11s ease-in-out infinite}
+.fx-ear{transform-origin:180px 44px;animation:fxtwitch 4.7s ease-in-out infinite}
+.fx-ear2{transform-origin:156px 46px;animation:fxtwitch 6.1s ease-in-out -2.4s infinite}
+.fx-eye{transform-box:fill-box;transform-origin:50% 50%;animation:fxblink 4.3s infinite}
+.fx-delay .fx-all,.fx-delay .fx-tail,.fx-delay .fx-head,.fx-delay .fx-eye{animation-delay:-1.7s}
+.fx-delay2 .fx-all,.fx-delay2 .fx-tail,.fx-delay2 .fx-head,.fx-delay2 .fx-eye{animation-delay:-5.2s}
+@keyframes fxbreathe{0%,100%{transform:scale(1,1)}50%{transform:scale(1.006,1.014)}}
+@keyframes fxwag{0%,100%{transform:rotate(0)}14%{transform:rotate(8deg)}26%{transform:rotate(1.5deg)}40%{transform:rotate(10deg)}55%{transform:rotate(0)}}
+@keyframes fxlook{0%,10%{transform:none}16%,30%{transform:rotate(-9deg)}36%,44%{transform:rotate(5deg)}50%,54%{transform:none}58%,70%{transform:translateX(-2px) rotate(-3deg) scaleX(.93)}75%,100%{transform:none}}
+@keyframes fxtwitch{0%,84%,100%{transform:none}88%{transform:rotate(-11deg)}92%{transform:rotate(3deg)}96%{transform:rotate(-5deg)}}
+@keyframes fxblink{0%,93%,100%{transform:scaleY(1)}96%{transform:scaleY(.1)}}
+
+.drift{position:absolute;left:0;top:0;width:var(--w,54px);animation:drift var(--dur,13s) linear var(--delay,0s) infinite;will-change:transform;pointer-events:none}
+.drift .flut{animation:flutter var(--fl,2.8s) ease-in-out var(--delay,0s) infinite;transform-origin:50% 50%}
+.drift svg{display:block;width:100%;height:auto;overflow:visible}
+@keyframes drift{0%{transform:translate3d(-14vw,0,0)}25%{transform:translate3d(16vw,var(--a,-30px),0)}50%{transform:translate3d(46vw,var(--b,10px),0)}75%{transform:translate3d(78vw,var(--c,-24px),0)}100%{transform:translate3d(114vw,var(--d,20px),0)}}
+@keyframes flutter{0%{transform:rotate(-24deg) scaleY(1)}25%{transform:rotate(30deg) scaleY(.5)}50%{transform:rotate(70deg) scaleY(1)}75%{transform:rotate(18deg) scaleY(.35)}100%{transform:rotate(-24deg) scaleY(1)}}
+
+.start{position:absolute;left:50%;z-index:16;transform:translateX(-50%);font:500 16px/1 var(--font-ui);color:var(--orange-ink);background:linear-gradient(180deg,#FFFFFF,#F4F3F1);border:1.5px solid #8F8C88;border-radius:11px;padding:16px 56px;cursor:pointer;box-shadow:inset 0 -2px 0 #E1DFDC,0 6px 0 #B9B6B2,0 7px 0 #7E7B77,0 10px 18px rgba(30,15,5,.25);opacity:0;transition:box-shadow .08s,translate .08s;white-space:nowrap}
+.start.down,.start:active{translate:0 5px;box-shadow:inset 0 -2px 0 #E1DFDC,0 1px 0 #B9B6B2,0 2px 0 #7E7B77,0 4px 8px rgba(30,15,5,.25)}
+
+.more{position:absolute;left:50%;z-index:16;transform:translateX(-50%);display:flex;align-items:center;gap:8px;margin:0;color:var(--cream);font-size:13px;opacity:0;white-space:nowrap}
+.more svg{width:16px;height:16px;animation:bob 1.6s ease-in-out infinite}
+
+/* Sections below the hero */
+.wrap{max-width:1100px;margin-inline:auto;padding-inline:clamp(16px,4vw,32px)}
+.sec{padding-block:clamp(72px,10vw,120px);scroll-margin-top:52px}
+.sec.tint{background:var(--tint)}
+.eyebrow{display:inline-flex;align-items:center;justify-content:center;box-sizing:border-box;height:36px;padding:0 18px 4px;border-radius:8px;background:linear-gradient(180deg,#2A2A2A,#1C1C1C);box-shadow:inset 0 1px 0 rgba(255,255,255,.07),inset 0 -4px 0 #0F0F0F,0 2px 0 #080808;color:var(--legend);font-size:13px;letter-spacing:.05em;line-height:1;vertical-align:top}
+.h2{margin:20px 0 0;font-size:clamp(28px,4vw,48px);line-height:1.08;font-weight:600;letter-spacing:-.015em;text-wrap:balance;max-width:20ch}
+.lead{margin:18px 0 0;font-size:clamp(16px,1.5vw,18px);line-height:1.65;color:var(--muted);max-width:60ch}
+.grid3{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,270px),1fr));gap:28px;margin-top:44px}
+.cap{position:relative;box-sizing:border-box;background:linear-gradient(180deg,#FFFFFF,#F6F5F3);border:1.5px solid #CFCAC4;border-radius:16px;box-shadow:inset 0 -3px 0 #E7E3DF,0 6px 0 #D6D1CB,0 7px 0 #ABA59E;padding:26px 26px 28px;min-width:0}
+.cap.dark{background:linear-gradient(180deg,#272727,#1B1B1B);border-color:#2F2F2F;box-shadow:inset 0 1px 0 rgba(255,255,255,.06),inset 0 -4px 0 #0F0F0F,0 6px 0 #0B0B0B;color:#F1EEEA}
+.cap h3{margin:14px 0 0;font-size:20px;line-height:1.3;font-weight:600}
+.cap p{margin:10px 0 0;font-size:15px;line-height:1.65;color:var(--muted)}
+.cap.dark p{color:#BDB8B2}
+.step-top{display:flex;align-items:center;justify-content:space-between}
+.step-n{font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:var(--muted)}
+.ico{width:34px;height:34px;color:var(--orange)}
+.note{margin:40px 0 0;font-size:14px;line-height:1.7;color:var(--muted);max-width:70ch}
+
+.screen{margin-top:40px;background:var(--case);border-radius:18px;box-shadow:inset 0 0 0 6px #1A1A1A,inset 0 0 0 7px var(--bezel),0 6px 0 #070707,0 30px 60px -30px rgba(20,12,8,.5);padding:clamp(30px,5vw,52px) 24px;display:flex;flex-wrap:wrap;align-items:baseline;justify-content:center;gap:10px 28px}
+.screen .word{font-size:clamp(34px,6vw,64px);font-weight:500;letter-spacing:.02em;color:#6F6A64;white-space:nowrap;min-height:1.2em}
+.screen .word b{font-weight:600;color:#F4F1EE}
+.screen .word u{color:#F4F1EE;text-decoration:none;border-bottom:4px solid var(--orange-hi)}
+.screen .next{font-size:clamp(15px,1.8vw,20px);color:#8A847E;letter-spacing:.04em}
+
+.split{display:grid;grid-template-columns:minmax(0,1.1fr) minmax(0,.9fr);gap:clamp(40px,6vw,72px);align-items:center}
+@media (max-width:860px){.split{grid-template-columns:minmax(0,1fr)}}
+.points{list-style:none;margin:26px 0 0;padding:0;display:grid;gap:14px;max-width:56ch}
+.points li{position:relative;padding-left:34px;font-size:16px;line-height:1.6}
+.points li::before{content:"";position:absolute;left:0;top:3px;width:20px;height:20px;border-radius:5px;background:linear-gradient(180deg,var(--orange-hi),var(--orange));box-shadow:inset 0 -2px 0 var(--orange-lo)}
+.kicker{margin:26px 0 0;font-size:clamp(18px,1.9vw,22px);font-weight:500;color:var(--orange-ink)}
+.compare{padding:30px}
+.cap.dark .compare-label{margin:0;font-size:12px;letter-spacing:.08em;text-transform:uppercase;color:#A9A49E}
+.crow{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);align-items:center;gap:14px;margin-top:20px}
+.crow small{display:block;font-size:13px;color:#A9A49E}
+.crow strong{display:block;font-size:clamp(32px,3.6vw,44px);font-weight:600;line-height:1.1;color:#F4F1EE;font-variant-numeric:tabular-nums}
+.crow strong i{font-style:normal;font-size:.42em;font-weight:500;color:#A9A49E;margin-left:4px}
+.crow .hunt strong{color:#F7A06B}
+.crow svg{width:44px;height:20px;color:#8D8882}
+.compare hr{border:0;border-top:1.5px dashed #3A3A3A;margin:24px 0 4px}
+.cap.dark .compare-foot{margin:22px 0 0;font-size:14px;color:#A9A49E}
+
+.tag{display:inline-block;font-size:12px;padding:5px 10px;border:1.5px solid currentColor;border-radius:8px;color:var(--orange-ink)}
+.cap.dark .tag{color:#F7A06B}
+.options{display:flex;flex-wrap:wrap;gap:16px 48px;margin-top:48px;font-size:14px}
+.opt{display:flex;flex-wrap:wrap;align-items:center;gap:10px}
+.opt-l{color:var(--muted);margin-right:4px}
+.mini{display:inline-block;padding:7px 12px 9px;border-radius:8px;background:linear-gradient(180deg,#272727,#1B1B1B);box-shadow:inset 0 -3px 0 #0F0F0F,0 2px 0 #080808;color:var(--legend);font-size:13px}
+
+.board{margin-top:36px;padding:0;overflow-x:auto}
+.brow{display:grid;grid-template-columns:64px minmax(140px,1fr) 130px 110px;gap:16px;align-items:center;padding:14px 24px;border-top:1px solid var(--line);font-size:15px;min-width:480px}
+.brow.head{border-top:0;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+.rank{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:7px;background:linear-gradient(180deg,var(--orange-hi),var(--orange));box-shadow:inset 0 -3px 0 var(--orange-lo);color:var(--key-letter);font-weight:600;font-size:14px}
+.sec-actions{margin-top:32px}
+
+.btn{display:inline-flex;align-items:center;justify-content:center;font:500 16px/1 var(--font-ui);color:var(--orange-ink);text-decoration:none;background:linear-gradient(180deg,#FFFFFF,#F4F3F1);border:1.5px solid #8F8C88;border-radius:11px;padding:16px 34px;box-shadow:inset 0 -2px 0 #E1DFDC,0 6px 0 #B9B6B2,0 7px 0 #7E7B77;transition:translate .08s,box-shadow .08s}
+.btn:active{translate:0 5px;box-shadow:inset 0 -2px 0 #E1DFDC,0 1px 0 #B9B6B2,0 2px 0 #7E7B77}
+.btn.orange{font-size:19px;font-weight:600;color:var(--key-letter);background:linear-gradient(180deg,var(--orange-hi),var(--orange) 62%);border-color:var(--orange-lo);box-shadow:inset 0 1px 0 rgba(255,255,255,.25),inset 0 -3px 0 var(--orange-lo),0 6px 0 #8E2F09,0 7px 0 #6B2306}
+.btn.orange:active{box-shadow:inset 0 -3px 0 var(--orange-lo),0 1px 0 #8E2F09,0 2px 0 #6B2306}
+a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
+
+.band{position:relative;overflow:hidden;background:var(--night);color:#F1EEEA}
+.band .wrap{position:relative;display:grid;grid-template-columns:minmax(0,.75fr) minmax(0,1.35fr) minmax(0,.7fr);align-items:center;gap:32px;padding-block:clamp(80px,10vw,128px)}
+.band .eyebrow{background:linear-gradient(180deg,#F2EFEB,#E1DDD8);color:#3A3632;box-shadow:inset 0 -4px 0 #C9C4BE,0 2px 0 #9D978F}
+.band .lead{color:#BDB8B2}
+.band .btn{margin-top:30px}
+.scrib{position:absolute;left:0;top:0;height:100%;width:42%;color:#1E1B19;pointer-events:none}
+.eyes{display:block;width:100%;max-width:320px;height:auto;overflow:visible;filter:drop-shadow(0 0 12px rgba(255,86,20,.75)) drop-shadow(0 0 36px rgba(255,60,10,.35))}
+.eyes .lid{animation:blink 6s infinite;transform-box:fill-box;transform-origin:center}
+.eyes .pupil{animation:slit 4.5s ease-in-out infinite;transform-box:fill-box;transform-origin:center}
+.eyes .halo{animation:smolder 3.2s ease-in-out infinite}
+@keyframes blink{0%,88%,100%{transform:scaleY(1)}91%{transform:scaleY(.05)}94%{transform:scaleY(1)}}
+@keyframes slit{0%,100%{transform:scaleX(1)}50%{transform:scaleX(.45)}}
+@keyframes smolder{0%,100%{opacity:.7}50%{opacity:1}}
+.band-fox{align-self:end;position:relative;justify-self:center;width:100%;max-width:220px}
+.band-fox svg{display:block;width:100%;height:auto}
+.band-fox::after{content:"";position:absolute;left:-30%;right:-30%;bottom:6px;height:3px;border-radius:2px;background:#3A2210}
+@media (max-width:860px){.band .wrap{grid-template-columns:minmax(0,1fr)}.eyes{max-width:170px}.band-fox{max-width:150px;justify-self:end}}
+
+.flow2{display:grid;gap:18px;margin-top:44px;max-width:760px}
+.frow{display:flex;align-items:center;gap:14px;min-width:0}
+.node{display:inline-flex;align-items:center;flex:1 1 0;min-width:0;min-height:64px;box-sizing:border-box;padding:14px 20px;border-radius:12px;background:linear-gradient(180deg,#FFFFFF,#F4F3F1);border:1.5px solid #CFCAC4;box-shadow:inset 0 -2px 0 #E7E3DF,0 4px 0 #D3CEC8,0 5px 0 #A8A29B;font-size:19px;font-weight:600;line-height:1.3}
+.node.dark{background:linear-gradient(180deg,#272727,#1B1B1B);border-color:#2F2F2F;color:#F1EEEA;box-shadow:inset 0 -3px 0 #0F0F0F,0 4px 0 #0B0B0B}
+.node.orange{background:linear-gradient(180deg,var(--orange-hi),var(--orange) 62%);border-color:var(--orange-lo);color:var(--key-letter);box-shadow:inset 0 -3px 0 var(--orange-lo),0 5px 0 #8E2F09,0 6px 0 #6B2306}
+.arr{flex:none;color:#8D8882;font-size:22px}
+@media (max-width:640px){.frow{flex-direction:column;align-items:stretch;gap:8px}.node{flex:none}.arr{align-self:center;transform:rotate(90deg)}}
+.cta{padding-top:clamp(80px,10vw,128px);text-align:center;background:var(--paper)}
+.cta .h2,.cta .lead{margin-inline:auto}
+.cta .btn{margin-top:32px}
+.cta-scene{position:relative;height:300px;margin-top:40px;overflow:hidden}
+.cta-ground{position:absolute;left:0;right:0;bottom:0}
+.cta-fox{position:absolute;left:50%;width:170px;height:170px;transform:translateX(-50%)}
+.cta-fox svg{display:block;width:100%;height:100%;overflow:visible}
+
+.foot{position:relative;background:linear-gradient(180deg,#5E351A,#4D2B15 45%,#3E2311);color:var(--cream);padding-block:24px 36px}
+.foot-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,200px),1fr));gap:36px 40px}
+.fcol h3{margin:0 0 14px;font-size:12px;letter-spacing:.08em;text-transform:uppercase;font-weight:500;color:var(--cream-dim)}
+.fcol a{display:block;color:var(--cream);text-decoration:none;font-size:15px;padding-block:4px}
+.fcol a:hover{text-decoration:underline;text-underline-offset:4px}
+.fcol p{margin:0 0 8px;font-size:14px;line-height:1.6}
+.fcol a.btn{display:inline-flex;margin-top:14px;padding:13px 26px}
+.mini-logo{display:flex;gap:6px;margin-bottom:18px;padding-top:6px;text-decoration:none;width:max-content}
+.mini-logo span{display:inline-grid;place-items:center;width:30px;height:30px;border-radius:6px;background:linear-gradient(180deg,var(--orange-hi),var(--orange) 62%);box-shadow:inset 0 -3px 0 var(--orange-lo);color:var(--key-letter);font-size:15px;font-weight:600}
+.mini-logo span:nth-child(2){translate:0 -6px}
+.foot-base{display:flex;flex-wrap:wrap;justify-content:space-between;gap:8px 24px;margin-top:40px;padding-top:20px;border-top:1px solid rgba(243,233,221,.18);font-size:12px;color:var(--cream-dim)}
+
+@media (prefers-reduced-motion: reduce){
+  .hint svg,.more svg,.drift .flut,.eyes .pupil,.eyes .halo{animation:none}
+  .drift{animation:none;transform:translateX(var(--x,40vw))}
+  .fox.hop{animation:none}
+  .fx-all,.fx-tail,.fx-head,.fx-ear,.fx-ear2,.fx-eye{animation:none}
+  .sky .cloud,.sky .flock,.sky .glide{animation:none}
+  .eyes .lid{animation:none}
+  .btn,.start{transition:none}
+}
+</style>
+</head>
+<body>
+<nav class="nav" id="nav" aria-label="Main">
+  <ul>
+    <li><a href="#track" aria-current="page">Home</a></li>
+    <li><a class="play" href="play/">Play</a></li>
+    <li><a href="about/">About Sly</a></li>
+    <li data-flag="leaderboard"><a href="leaderboard/">Leaderboard</a></li>
+  </ul>
+  <a class="profile" href="profile/" aria-label="Profile" data-flag="profile">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="16" r="14" fill="none" stroke="currentColor" stroke-width="2"/><circle cx="16" cy="13" r="5" fill="currentColor"/><path d="M7.5 25.5c2-4 5-5.6 8.5-5.6s6.5 1.6 8.5 5.6" fill="currentColor"/></svg>
+  </a>
+</nav>
+
+<div class="track" id="track">
+  <div class="stage" id="stage">
+    <h1 class="sr-only">Slyrun</h1>
+
+    <div class="sky" id="sky" aria-hidden="true">
+      <div class="sun"></div>
+      <div class="cloud" style="top:13%;--cw:clamp(150px,17vw,250px);--dur:150s;--delay:-40s"><svg viewBox="0 0 220 90"><use href="#cloudShape"/></svg></div>
+      <div class="cloud" style="top:30%;--cw:clamp(110px,11vw,170px);--dur:110s;--delay:-82s;opacity:.85"><svg viewBox="0 0 220 90"><use href="#cloudShape"/></svg></div>
+      <div class="cloud" style="top:7%;--cw:clamp(120px,13vw,200px);--dur:190s;--delay:-150s;opacity:.9"><svg viewBox="0 0 220 90"><use href="#cloudShape"/></svg></div>
+      <div class="cloud" style="top:22%;--cw:clamp(90px,9vw,140px);--dur:130s;--delay:-12s;opacity:.75"><svg viewBox="0 0 220 90"><use href="#cloudShape"/></svg></div>
+      <div class="flock" style="top:17%;--fw:clamp(72px,7vw,108px);--dur:30s;--delay:-6s"><div class="glide" style="--sw:8s"><svg viewBox="-4 -8 98 44"><g transform="translate(14 20)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="5.89s" begin="0s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.1s" begin="0s" repeatCount="indefinite"/></path></g></g><g transform="translate(46 9)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.65s" begin="-1.2s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.5s" begin="-1.2s" repeatCount="indefinite"/></path></g></g><g transform="translate(76 24)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -2.5;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.27s" begin="-2.1s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.3s" begin="-2.1s" repeatCount="indefinite"/></path></g></g></svg></div></div>
+      <div class="flock back" style="top:34%;--fw:clamp(50px,4.8vw,74px);--dur:40s;--delay:-24s"><div class="glide" style="--sw:10s"><svg viewBox="-4 -8 70 44"><g transform="translate(16 16)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.46s" begin="-0.6s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.4s" begin="-0.6s" repeatCount="indefinite"/></path></g></g><g transform="translate(46 26)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3.5;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="5.70s" begin="-1.9s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.0s" begin="-1.9s" repeatCount="indefinite"/></path></g></g></svg></div></div>
+      <div class="flock" style="top:9%;--fw:clamp(68px,6.4vw,100px);--dur:48s;--delay:-34s"><div class="glide" style="--sw:11s"><svg viewBox="-4 -8 116 44"><g transform="translate(14 20)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.08s" begin="-0.3s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.2s" begin="-0.3s" repeatCount="indefinite"/></path></g></g><g transform="translate(40 8)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -4;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.84s" begin="-1.6s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.6s" begin="-1.6s" repeatCount="indefinite"/></path></g></g><g transform="translate(66 22)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -2.5;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="5.70s" begin="-2.4s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.0s" begin="-2.4s" repeatCount="indefinite"/></path></g></g><g transform="translate(94 12)"><g><animateTransform attributeName="transform" type="translate" values="0 0;0 -3;0 0" keyTimes="0;0.5;1" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1" dur="6.46s" begin="-0.9s" repeatCount="indefinite"/><path d="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" fill="none" stroke="#3E3934" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><animate attributeName="d" values="M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-11.5 -12.5 C-11.5 -5.5 -3.5 -2 0 1.4 C3.5 -2 11.5 -5.5 11.5 -12.5;M-15.5 -1 C-10 -4.5 -4 -2.5 0 0.3 C4 -2.5 10 -4.5 15.5 -1;M-13 7.5 C-9 0.5 -3.5 -0.8 0 -1.8 C3.5 -0.8 9 0.5 13 7.5;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5;M-16.5 -4 C-10 -8.5 -4 -5 0 -0.4 C4 -5 10 -8.5 16.5 -4;M-16 -2.5 C-10 -7.5 -4 -4.5 0 0 C4 -4.5 10 -7.5 16 -2.5" keyTimes="0.00;0.05;0.11;0.16;0.21;0.26;0.31;0.36;0.41;0.46;0.51;0.56;0.61;0.70;0.85;1.00" calcMode="spline" keySplines="0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1;0.45 0 0.55 1" dur="3.4s" begin="-0.9s" repeatCount="indefinite"/></path></g></g></svg></div></div>
+    </div>
+
+    <div class="scene" id="scene" aria-hidden="true">
+      <div class="hills" id="hills"><svg viewBox="0 0 1440 320" preserveAspectRatio="xMidYMax slice">
+        <path d="M0 132 C110 104 200 70 320 78 C430 86 500 120 620 112 C720 106 800 64 930 62 C1050 60 1120 100 1220 96 C1310 92 1380 70 1440 74 L1440 320 L0 320 Z" fill="#D3E5D6"/>
+        <path id="crestFar" d="M0 176 C90 140 190 118 300 128 C400 138 470 100 590 96 C700 92 760 130 860 128 C960 126 1030 88 1150 92 C1260 96 1340 132 1440 120" fill="none"/>
+        <path d="M0 176 C90 140 190 118 300 128 C400 138 470 100 590 96 C700 92 760 130 860 128 C960 126 1030 88 1150 92 C1260 96 1340 132 1440 120 L1440 320 L0 320 Z" fill="#BCD6A6"/>
+        <g id="treesFar"></g>
+        <path id="crestNear" d="M0 238 C100 200 220 180 330 192 C440 204 520 234 640 238 C740 242 820 236 900 224 C1000 208 1110 178 1220 184 C1320 190 1390 214 1440 206" fill="none"/>
+        <path d="M0 238 C100 200 220 180 330 192 C440 204 520 234 640 238 C740 242 820 236 900 224 C1000 208 1110 178 1220 184 C1320 190 1390 214 1440 206 L1440 320 L0 320 Z" fill="#A5C88A"/>
+        <g id="treesNear"></g>
+      </svg></div>
+      <div class="ground" id="ground"><svg viewBox="0 -50 1440 450" preserveAspectRatio="xMidYMin slice"><use href="#groundArt"/></svg></div>
+
+      <div class="drift" data-k="-0.86" style="--w:58px;--dur:13s;--delay:-1s;--fl:2.6s;--a:-34px;--b:-8px;--c:-46px;--d:-14px;--x:8vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="drift" data-k="-0.55" style="--w:48px;--dur:16s;--delay:-6s;--fl:3.4s;--a:20px;--b:-18px;--c:12px;--d:44px;--x:27vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="drift" data-k="-0.32" style="--w:54px;--dur:11s;--delay:-8.5s;--fl:2.2s;--a:-22px;--b:14px;--c:-10px;--d:30px;--x:70vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="drift" data-k="-0.7" style="--w:42px;--dur:18s;--delay:-3s;--fl:3s;--a:-50px;--b:-20px;--c:-60px;--d:-30px;--x:90vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="drift" data-k="-0.18" style="--w:50px;--dur:14s;--delay:-11.5s;--fl:2.8s;--a:-12px;--b:6px;--c:-18px;--d:16px;--x:55vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+
+      <div class="fox" id="fox">
+        <svg viewBox="0 0 240 240"><use href="#foxArt"/></svg>
+      </div>
+    </div>
+
+    <div class="kb" id="kb" role="img" aria-label="A keyboard with the S, L, Y, R, U and N keys lit orange"></div>
+
+    <div class="hint" id="hint" aria-hidden="true">
+      <span>Scroll</span>
+      <svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg>
+    </div>
+
+    <div class="keys" id="keys" aria-hidden="true"></div>
+
+    <p class="tagline" id="tagline">Help Sly escape the doom!</p>
+
+    <button class="start" id="start" type="button">Press space to start</button>
+    <p class="more" id="more" aria-hidden="true"><span id="moreText">Or scroll to learn more</span><svg viewBox="0 0 24 24"><path d="M6 9l6 6 6-6" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"/></svg></p>
+  </div>
+</div>
+
+<main>
+  <section class="sec" id="how" aria-labelledby="how-h">
+    <div class="wrap">
+      <span class="eyebrow">how to play</span>
+      <h2 class="h2" id="how-h">Your fingers are Sly's legs.</h2>
+      <div class="screen" aria-hidden="true">
+        <span class="word"><b id="tTyped">out</b><u id="tCur">r</u><span id="tRest">un</span></span>
+        <span class="next" id="tNext">ember · hollow</span>
+      </div>
+      <div class="grid3">
+        <article class="cap">
+          <div class="step-top"><span class="step-n">Step 1</span>
+            <svg class="ico" viewBox="0 0 32 32" aria-hidden="true"><circle cx="16" cy="18" r="10" fill="none" stroke="currentColor" stroke-width="2.4"/><path d="M16 18V12.5M13 4h6M16 4v4" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/></svg></div>
+          <h3>Take the 30-second test</h3>
+          <p>Type a few lines so Slyrun learns your real speed. Everything in the game is tuned to it.</p>
+        </article>
+        <article class="cap">
+          <div class="step-top"><span class="step-n">Step 2</span>
+            <svg class="ico" viewBox="0 0 32 32" aria-hidden="true"><path d="M3 11h10M5 16h11M3 21h9" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"/><path d="M19 8l8 8-8 8" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+          <h3>Type to run</h3>
+          <p>Every correct letter pushes Sly forward. Type faster and Sly sprints. Slow down and Sly tires.</p>
+        </article>
+        <article class="cap">
+          <div class="step-top"><span class="step-n">Step 3</span>
+            <svg class="ico" viewBox="0 0 32 32" aria-hidden="true"><ellipse cx="9" cy="16" rx="6.5" ry="3.4" fill="currentColor"/><ellipse cx="23" cy="16" rx="6.5" ry="3.4" fill="currentColor"/><path d="M9 13.4v5.2M23 13.4v5.2" stroke="#1E1B19" stroke-width="2" stroke-linecap="round"/></svg></div>
+          <h3>Stay ahead of the Hollow</h3>
+          <p>It never stops. If it reaches Sly, the ground gives way.</p>
+        </article>
+      </div>
+      <p class="note">Typos cost you ground. In Stumble mode, Sly trips. In Freeze mode, the world turns grey until you fix the letter.</p>
+    </div>
+  </section>
+
+  <section class="sec tint" id="modes" aria-labelledby="modes-h">
+    <div class="wrap">
+      <span class="eyebrow">modes</span>
+      <h2 class="h2" id="modes-h">Pick your run</h2>
+      <div class="grid3">
+        <article class="cap"><span class="tag">30 s · 1 min · 2 min</span><h3>Timed Journey</h3><p>Reach the finish line before the Hollow reaches you. Your score is your WPM.</p></article>
+        <article class="cap"><span class="tag">Until you're caught</span><h3>Survival</h3><p>The Hollow speeds up every 10 seconds. Every run ends. Your score is how far you got, in meters.</p></article>
+        <article class="cap dark"><span class="tag">Fixed speeds</span><h3>Ranked</h3><p>The Hollow hunts at 30, 50 or 70 WPM, the same for everyone. Ranked scores go on the leaderboard.</p></article>
+      </div>
+      <div class="options">
+        <div class="opt"><span class="opt-l">Difficulty</span><span class="mini">Easy</span><span class="mini">Medium</span><span class="mini">Hard</span></div>
+        <div class="opt"><span class="opt-l">Typo rule</span><span class="mini">Stumble</span><span class="mini">Freeze</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="fair" aria-labelledby="fair-h">
+    <div class="wrap split">
+      <div>
+        <span class="eyebrow">fair panic</span>
+        <h2 class="h2" id="fair-h">A 30 WPM typist and a 120 WPM typist feel the same panic.</h2>
+        <p class="lead">Most typing games crush slow typists or bore fast ones. Slyrun sets the Hollow's pace from your own speed, so everyone runs on the edge.</p>
+        <ul class="points">
+          <li>Typed slowly on the test to get an easy run? The Hollow learns your real pace within seconds, then lunges.</li>
+          <li>Ranked runs use fixed speeds, so every leaderboard score is earned.</li>
+        </ul>
+        <p class="kicker">And you get faster without noticing.</p>
+      </div>
+      <div class="cap dark compare">
+        <p class="compare-label">Medium difficulty</p>
+        <div class="crow">
+          <div><small>You type</small><strong>30<i>WPM</i></strong></div>
+          <svg viewBox="0 0 44 20" aria-hidden="true"><path d="M2 10h36M31 3l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="hunt"><small>The Hollow hunts at</small><strong>27<i>WPM</i></strong></div>
+        </div>
+        <hr>
+        <div class="crow">
+          <div><small>You type</small><strong>120<i>WPM</i></strong></div>
+          <svg viewBox="0 0 44 20" aria-hidden="true"><path d="M2 10h36M31 3l7 7-7 7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <div class="hunt"><small>The Hollow hunts at</small><strong>108<i>WPM</i></strong></div>
+        </div>
+        <p class="compare-foot">Either way, it's always just behind you.</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sec" id="board" aria-labelledby="board-h" data-flag="leaderboard">
+    <div class="wrap">
+      <span class="eyebrow">leaderboard</span>
+      <h2 class="h2" id="board-h">Who outran it furthest</h2>
+      <p class="lead">Top 5 ranked runs · Survival · Medium</p>
+      <div class="cap board">
+        <div class="brow head"><span>Rank</span><span>Player</span><span>Distance</span><span>Accuracy</span></div>
+        <div class="brow"><span class="rank">1</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
+        <div class="brow"><span class="rank">2</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
+        <div class="brow"><span class="rank">3</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
+        <div class="brow"><span>4</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
+        <div class="brow"><span>5</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
+      </div>
+      <div class="sec-actions"><a class="btn" href="leaderboard/">See the full leaderboard</a></div>
+    </div>
+  </section>
+
+  <section class="band" id="sly" aria-labelledby="sly-h">
+    <svg class="scrib" viewBox="0 0 400 600" preserveAspectRatio="none" aria-hidden="true"><path d="M20 40 C120 90 60 160 160 200 C260 240 140 320 240 360 C330 400 200 470 300 520 M60 10 C150 60 110 120 200 150 M10 300 C90 330 60 400 140 440 C220 480 150 540 230 590 M120 0 C210 40 170 90 260 110" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round"/></svg>
+    <div class="wrap">
+      <svg class="eyes" viewBox="0 0 300 130" aria-hidden="true">
+        <defs>
+          <radialGradient id="eyeFire" cx="50%" cy="58%" r="62%"><stop offset="0" stop-color="#FFF4B8"/><stop offset=".22" stop-color="#FFC03A"/><stop offset=".58" stop-color="#EC4A0E"/><stop offset="1" stop-color="#6A1003"/></radialGradient>
+          <radialGradient id="eyeHalo"><stop offset="0" stop-color="#FF5A1A" stop-opacity=".5"/><stop offset="1" stop-color="#FF5A1A" stop-opacity="0"/></radialGradient>
+          <clipPath id="eyeClipL"><path d="M26 62 C56 34 104 36 134 72 C100 82 56 80 26 62 Z"/></clipPath>
+          <clipPath id="eyeClipR"><path d="M274 62 C244 34 196 36 166 72 C200 82 244 80 274 62 Z"/></clipPath>
+        </defs>
+        <ellipse class="halo" cx="150" cy="66" rx="150" ry="58" fill="url(#eyeHalo)"/>
+        <g class="lid">
+          <g clip-path="url(#eyeClipL)"><rect x="20" y="30" width="120" height="56" fill="url(#eyeFire)"/><ellipse class="pupil" cx="86" cy="62" rx="4.5" ry="24" fill="#0A0504"/></g>
+          <g clip-path="url(#eyeClipR)"><rect x="160" y="30" width="120" height="56" fill="url(#eyeFire)"/><ellipse class="pupil" cx="214" cy="62" rx="4.5" ry="24" fill="#0A0504"/></g>
+        </g>
+        <path d="M10 30 L140 64 L148 14 Z" fill="#0E0D0C"/>
+        <path d="M290 30 L160 64 L152 14 Z" fill="#0E0D0C"/>
+      </svg>
+      <div>
+        <span class="eyebrow">meet sly</span>
+        <h2 class="h2" id="sly-h">The last thing still running</h2>
+        <p class="lead">The world is ending. A darkness called the Hollow is swallowing the forests, the mountains, the ground itself. Something lives inside it, and it's hungry. Sly is the last thing still running.</p>
+        <a class="btn" href="about/">Read Sly's story</a>
+      </div>
+      <div class="band-fox" aria-hidden="true"><svg class="fx-delay" viewBox="0 0 240 240"><use href="#foxArt"/></svg></div>
+    </div>
+  </section>
+
+  <section class="sec" id="behind" aria-labelledby="behind-h">
+    <div class="wrap">
+      <span class="eyebrow">behind the game</span>
+      <h2 class="h2" id="behind-h">How Slyrun keeps up with you</h2>
+      <div class="flow2" role="img" aria-label="Type faster and Sly pulls ahead. Slow down or slip and the Hollow closes in.">
+        <div class="frow"><span class="node">Type faster</span><span class="arr">→</span><span class="node orange">Sly pulls ahead</span></div>
+        <div class="frow"><span class="node">Slow down or slip</span><span class="arr">→</span><span class="node dark">The Hollow closes in</span></div>
+      </div>
+      <div class="grid3">
+        <article class="cap"><h3>Smooth, not twitchy</h3><p>Sly's speed follows your typing over the last 3 seconds, so Sly never stutters between words.</p></article>
+        <article class="cap"><h3>It learns while you run</h3><p>Type well above your baseline and your baseline rises mid-run. The Hollow speeds up with it.</p></article>
+        <article class="cap"><h3>Made by hand</h3><p>Built in Godot, with open word lists split into Easy, Medium and Hard, and art and sound made for Slyrun.</p></article>
+      </div>
+    </div>
+  </section>
+
+  <section class="cta" aria-labelledby="cta-h">
+    <div class="wrap">
+      <h2 class="h2" id="cta-h">The Hollow is already moving.</h2>
+      <p class="lead">Free in your browser. Bring a keyboard.</p>
+      <a class="btn orange" href="play/" id="ctaPlay">Play Slyrun</a>
+    </div>
+    <div class="cta-scene" id="ctaScene" aria-hidden="true">
+      <div class="drift" style="top:40px;--w:52px;--dur:14s;--delay:-4s;--fl:2.7s;--a:-20px;--b:10px;--c:-26px;--d:24px;--x:18vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="drift" style="top:96px;--w:44px;--dur:17s;--delay:-10s;--fl:3.2s;--a:14px;--b:-16px;--c:8px;--d:30px;--x:78vw"><div class="flut"><svg viewBox="-6 -2 66 28"><use href="#leafShape"/></svg></div></div>
+      <div class="cta-ground" id="ctaGround"><svg viewBox="0 -50 1440 150" preserveAspectRatio="xMidYMin slice"><use href="#groundArt"/></svg></div>
+      <div class="cta-fox" id="ctaFox"><svg class="fx-delay2" viewBox="0 0 240 240"><use href="#foxArt"/></svg></div>
+    </div>
+  </section>
+</main>
+
+<footer class="foot">
+  <div class="wrap">
+    <div class="foot-grid">
+      <div class="fcol">
+        <a class="mini-logo" href="#track" aria-label="Slyrun, back to top"><span>S</span><span>L</span><span>Y</span><span>R</span><span>U</span><span>N</span></a>
+        <p>Help Sly escape the doom!</p>
+        <a class="btn orange" href="play/">Play Slyrun</a>
+      </div>
+      <nav class="fcol" aria-label="Play">
+        <h3>Play</h3>
+        <a href="play/">Start a run</a>
+        <a href="#how">How to play</a>
+        <a href="#modes">Modes</a>
+        <a href="leaderboard/" data-flag="leaderboard">Leaderboard</a>
+        <a href="profile/" data-flag="profile">Your profile</a>
+      </nav>
+      <nav class="fcol" aria-label="Story">
+        <h3>Story</h3>
+        <a href="about/">About Sly</a>
+        <a href="#sly">The Hollow</a>
+        <a href="#fair">Fair at any speed</a>
+        <a href="#behind">Behind the game</a>
+      </nav>
+      <nav class="fcol" aria-label="Project" id="projectCol">
+        <h3>Project</h3>
+        <a id="lnkDevpost" href="#">Devpost</a>
+        <a id="lnkGithub" href="#">GitHub</a>
+        <a id="lnkItch" href="#">itch.io</a>
+      </nav>
+    </div>
+    <div class="foot-base"><span>© 2026 Team Slyrun</span><span>Word lists from Monkeytype</span></div>
+  </div>
+</footer>
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <linearGradient id="leafFill" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9BD255"/><stop offset="0.55" stop-color="#5DAA34"/><stop offset="1" stop-color="#2F7D24"/></linearGradient>
+    <g id="leafShape">
+      <path d="M2 12 C14 -1 40 -3 58 10 C42 23 16 25 2 12 Z" fill="url(#leafFill)"/>
+      <path d="M4 12 C22 10 40 10 56 10" fill="none" stroke="#2C6A1E" stroke-width="1.3" stroke-linecap="round"/>
+      <path d="M2 12 C-1 13 -3 15 -5 17" fill="none" stroke="#3A7A26" stroke-width="1.6" stroke-linecap="round"/>
+      <path d="M14 6 C24 3 34 3 42 5" fill="none" stroke="#C6EC8C" stroke-width="1.2" stroke-linecap="round" opacity="0.7"/>
+    </g>
+    <linearGradient id="fxBody" x1="0.85" y1="0" x2="0.15" y2="1"><stop offset="0" stop-color="#F28D4F"/><stop offset="1" stop-color="#D1561D"/></linearGradient>
+    <linearGradient id="fxTail" x1="1" y1="0.1" x2="0" y2="0.9"><stop offset="0" stop-color="#E7783B"/><stop offset="1" stop-color="#CA521B"/></linearGradient>
+    <linearGradient id="fxHead" x1="0.1" y1="0" x2="0.9" y2="1"><stop offset="0" stop-color="#F49B5F"/><stop offset="1" stop-color="#DE672A"/></linearGradient>
+  </defs>
+  <g id="groundArt">
+    <path d="M0 6 C70 -8 150 -16 240 -6 C320 3 380 14 460 7 C520 2 556 0 600 0 L840 0 C884 0 930 -5 990 -12 C1070 -21 1150 -8 1230 3 C1300 12 1370 4 1440 -5 L1440 400 L0 400 Z" fill="#6E3F1E"/>
+    <path d="M0 72 C120 60 220 84 340 74 C460 64 560 86 700 78 C840 70 940 90 1080 78 C1200 68 1320 86 1440 74 L1440 400 L0 400 Z" fill="#5E351A"/>
+    <path d="M0 172 C140 162 260 184 400 174 C540 164 660 188 800 178 C940 168 1060 190 1200 180 C1300 173 1380 182 1440 178 L1440 400 L0 400 Z" fill="#4D2B15"/>
+    <path d="M0 282 C160 272 300 292 460 284 C620 276 760 296 920 288 C1080 280 1240 298 1440 288 L1440 400 L0 400 Z" fill="#3E2311"/>
+    <g id="groundDetail"></g>
+    <path d="M0 6 C70 -8 150 -16 240 -6 C320 3 380 14 460 7 C520 2 556 0 600 0 L840 0 C884 0 930 -5 990 -12 C1070 -21 1150 -8 1230 3 C1300 12 1370 4 1440 -5" fill="none" stroke="#4E2B13" stroke-width="3" opacity=".5" transform="translate(0 8)"/>
+    <path id="gLip" d="M0 6 C70 -8 150 -16 240 -6 C320 3 380 14 460 7 C520 2 556 0 600 0 L840 0 C884 0 930 -5 990 -12 C1070 -21 1150 -8 1230 3 C1300 12 1370 4 1440 -5" fill="none" stroke="#8C5732" stroke-width="5" stroke-linecap="round"/>
+    <g id="groundTop"></g>
+  </g>
+  <symbol id="cloudShape" viewBox="0 0 220 90">
+    <path d="M34 84 C14 84 6 66 20 57 C14 38 36 26 54 34 C60 14 94 6 112 24 C124 10 156 12 164 36 C184 30 206 44 200 62 C216 66 214 84 194 84 Z" fill="#FFFFFF"/>
+    <path d="M34 84 C22 84 14 78 13 70 C40 76 160 78 205 70 C206 78 202 84 194 84 Z" fill="#E6F0F6"/>
+  </symbol>
+  <symbol id="foxArt" viewBox="0 0 240 240">
+    <ellipse cx="124" cy="232" rx="104" ry="6.5" fill="#2A1508" opacity="0.28"/>
+    <g class="fx-all">
+      <g class="fx-tail">
+        <path d="M128 228 C96 240 40 240 18 218 C0 200 4 168 28 154 C46 144 70 150 76 168 C80 182 68 194 54 190 C62 204 92 214 122 206 Z" fill="url(#fxTail)"/>
+        <path d="M28 154 C46 144 70 150 76 168 C80 182 68 194 54 190 C51 184 47 181 42 180 L44 175 L37 177 L36 172 L28 176 C23 168 23 160 28 154 Z" fill="#FFF6EC"/>
+      </g>
+      <g class="fx-body">
+        <path d="M140 118 C136 98 140 80 156 68 L210 70 C215 90 211 108 202 122 Z" fill="#EA7C3E"/>
+        <path d="M96 230 C84 200 92 160 120 136 C132 126 140 118 146 106 L196 112 C204 140 202 176 194 206 C190 218 186 226 182 231 L100 231 Z" fill="url(#fxBody)"/>
+        <path d="M120 136 C104 154 94 186 96 230 L104 230 C102 190 110 158 126 140 Z" fill="#B9491A" opacity="0.45"/>
+        <path d="M96 231 C88 204 104 180 132 178 C160 176 172 198 170 231 Z" fill="#D45A20"/>
+        <ellipse cx="112" cy="230" rx="14" ry="5" fill="#3B2418"/>
+        <path d="M158 110 C186 112 206 128 204 156 C202 178 192 194 180 204 L176 196 L172 204 L170 194 C174 168 172 136 158 118 Z" fill="#FFF6EC"/>
+        <path d="M166 104 C186 102 204 94 214 82 C217 100 212 116 202 128 C190 118 176 112 158 114 Z" fill="#FFF6EC"/>
+        <path d="M166 194 C166 210 165 222 164 231 L176 231 C176 220 177 208 179 197 Z" fill="#3B2418"/>
+        <path d="M182 196 C184 210 185 222 185 231 L197 231 C196 220 195 208 194 194 Z" fill="#2E1B12"/>
+        <ellipse cx="170" cy="231" rx="9" ry="4" fill="#24150E"/>
+        <ellipse cx="191" cy="231" rx="9" ry="4" fill="#24150E"/>
+      </g>
+      <g class="fx-head">
+        <g class="fx-ear2">
+          <path d="M148 50 L152 4 L170 38 Z" fill="#C9541E"/>
+          <path d="M152.5 42 L154 16 L164 38 Z" fill="#5A3020"/>
+          <path d="M152 4 L150.7 17.3 L157.8 14.8 Z" fill="#2E1B12"/>
+        </g>
+        <path d="M140 84 C136 58 152 38 178 36 C194 35 206 42 214 54 C220 60 228 64 236 66 C235 74 228 80 216 82 C206 92 192 100 176 101 C158 101 142 96 140 84 Z" fill="url(#fxHead)"/>
+        <g class="fx-ear">
+          <path d="M166 42 L180 0 L194 44 Z" fill="url(#fxHead)"/>
+          <path d="M172 40 L180 12 L188 42 Z" fill="#FFF1E4"/>
+          <path d="M180 0 L175.5 13.5 L184.4 13.5 Z" fill="#2E1B12"/>
+        </g>
+        <path d="M202 66 C212 72 224 74 234 72 C230 79 222 82 214 84 C204 94 190 100 174 100 C186 90 196 78 202 66 Z" fill="#FFF6EC"/>
+        <path d="M150 92 C160 102 172 106 182 104 C172 112 158 110 148 100 Z" fill="#FFF6EC"/>
+        <circle cx="235" cy="68.5" r="4" fill="#1F130D"/>
+        <path d="M226 79 q-7 3.5 -14 2.5" fill="none" stroke="#8A4A2A" stroke-width="1.3" stroke-linecap="round"/>
+        <g class="fx-eye">
+          <ellipse cx="204" cy="56" rx="4.2" ry="4.7" fill="#1F130D"/>
+          <circle cx="205.6" cy="54.4" r="1.4" fill="#FFFFFF"/>
+        </g>
+        <path d="M197 49 q6 -3 12 0" fill="none" stroke="#B9491A" stroke-width="1.4" stroke-linecap="round"/>
+      </g>
+    </g>
+  </symbol>
+</svg>
+
+<script>
+(function(){
+  // ---- Site settings: edit these, nothing else needs to change ----
+  var CONFIG = {
+    GAME_URL: "play/",          // the play page: "Press space to start" and every Play link open it. Empty: Sly just hops.
+    SHOW_LEADERBOARD: false,   // true once the leaderboard backend works
+    SHOW_PROFILE: true,        // false hides the profile icon and footer link
+    DEVPOST_URL: "",           // empty links are hidden
+    GITHUB_URL: "",
+    ITCH_URL: ""
+  };
+  var GAME_URL = CONFIG.GAME_URL;
+  if(GAME_URL){ [].forEach.call(document.querySelectorAll('a[href="play/"]'),function(a){ a.href=GAME_URL; }); }
+
+  // Sly is drawn once; copy the drawing into each fox so its parts can be animated
+  (function(){
+    var sym=document.getElementById("foxArt");
+    [].forEach.call(document.querySelectorAll('use[href="#foxArt"]'),function(u){
+      var svg=u.parentNode; svg.removeChild(u);
+      [].forEach.call(sym.children,function(n){ svg.appendChild(n.cloneNode(true)); });
+    });
+  })();
+
+  // Flags, links and names
+  [].forEach.call(document.querySelectorAll('[data-flag="leaderboard"]'),function(el){ el.hidden=!CONFIG.SHOW_LEADERBOARD; });
+  [].forEach.call(document.querySelectorAll('[data-flag="profile"]'),function(el){ el.hidden=!CONFIG.SHOW_PROFILE; });
+  var anyLink=false;
+  [["lnkDevpost",CONFIG.DEVPOST_URL],["lnkGithub",CONFIG.GITHUB_URL],["lnkItch",CONFIG.ITCH_URL]].forEach(function(l){
+    var a=document.getElementById(l[0]);
+    if(l[1]){ a.href=l[1]; anyLink=true; } else { a.hidden=true; }
+  });
+  document.getElementById("projectCol").hidden=!anyLink;
+
+  var coarse=window.matchMedia && matchMedia("(hover: none) and (pointer: coarse)").matches;
+  var reduced=window.matchMedia && matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+  if(reduced){ [].forEach.call(document.querySelectorAll(".flock svg"),function(svg){ svg.pauseAnimations && svg.pauseAnimations(); }); }
+
+  var LIT = "SLYRUN";
+  var LETTERS = "QWERTYUIOPASDFGHJKLZXCVBNM";
+  function L(c){ return {m:c, letter:true, home:(c==="F"||c==="J")}; }
+  var ROWS = [
+    [{w:1.5,tl:"↖",bl:"esc"}].concat("F1 F2 F3 F4 F5 F6 F7 F8 F9 F10 F11 F12".split(" ").map(function(f){return {m:f,cls:"fn"};})).concat([{w:1.5,knob:true}]),
+    [["§","±"],["1","!"],["2","@"],["3","#"],["4","$"],["5","%"],["6","^"],["7","&"],["8","*"],["9","("],["0",")"],["–","_"],["=","+"]].map(function(p){return {m:p[0],t:p[1],cls:"num"};}).concat([{w:2,tl:"×",bl:"del"}]),
+    [{w:1.5,tl:"⇥",bl:"tab"}].concat("QWERTYUIOP".split("").map(L)).concat([{m:"[",t:"{"},{m:"]",t:"}"},{w:1.5,m:"\\",t:"|"}]),
+    [{w:1.75,tl:"⇪",bl:"caps"}].concat("ASDFGHJKL".split("").map(L)).concat([{m:";",t:":"},{m:"'",t:"\""},{w:2.25,tl:"↵",bl:"enter"}]),
+    [{w:1.25,tl:"⇧",bl:"shift"},{m:"`",t:"~"}].concat("ZXCVBNM".split("").map(L)).concat([{m:",",t:"<"},{m:".",t:">"},{m:"/",t:"?"},{w:1.75,tl:"⇧",bl:"shift"},{m:"↑",cls:"arrow"}]),
+    [{bl:"fn"},{tl:"⌃",bl:"ctrl"},{w:1.25,tl:"⌥",bl:"opt"},{w:1.25,tl:"⌘",bl:"cmd"},{w:6.25},{w:1.25,tl:"⌘",bl:"cmd"},{tl:"⌥",bl:"opt"},{m:"←",cls:"arrow"},{m:"↓",cls:"arrow"},{m:"→",cls:"arrow"}]
+  ];
+
+  var stage=document.getElementById("stage"), track=document.getElementById("track"), kb=document.getElementById("kb"),
+      keysLayer=document.getElementById("keys"), hint=document.getElementById("hint"), tagline=document.getElementById("tagline"),
+      nav=document.getElementById("nav"), scene=document.getElementById("scene"), ground=document.getElementById("ground"),
+      fox=document.getElementById("fox"), startBtn=document.getElementById("start"), more=document.getElementById("more"),
+      sky=document.getElementById("sky"), hills=document.getElementById("hills");
+  if(coarse){
+    startBtn.textContent="Play on a computer";
+    document.getElementById("moreText").textContent="Slyrun needs a keyboard · scroll to learn more";
+  }
+  var drifts=[].slice.call(document.querySelectorAll("#scene .drift"));
+  var ctaScene=document.getElementById("ctaScene"), ctaGround=document.getElementById("ctaGround"), ctaFox=document.getElementById("ctaFox");
+
+  // Ground details: texture, roots, rocks and grass, generated once from a fixed seed
+  (function(){
+    var NS="http://www.w3.org/2000/svg", deep=document.getElementById("groundDetail"), top=document.getElementById("groundTop"), lip=document.getElementById("gLip");
+    var seed=11; function rnd(){ seed=(seed*16807)%2147483647; return (seed-1)/2147483646; }
+    var len=lip.getTotalLength(), pts=[];
+    for(var i=0;i<=480;i++){ pts.push(lip.getPointAtLength(len*i/480)); }
+    function surfY(x){ for(var i=1;i<pts.length;i++){ if(pts[i].x>=x){ var a=pts[i-1],b=pts[i],t=(x-a.x)/Math.max(1e-6,b.x-a.x); return a.y+(b.y-a.y)*t; } } return pts[pts.length-1].y; }
+    function add(parent,n,at){ var e=document.createElementNS(NS,n); for(var k in at) e.setAttribute(k,at[k]); parent.appendChild(e); return e; }
+    var cols=["#7E4C28","#4A2913","#8B5A35","#3E2210","#9A6A42"];
+    for(var sN=0;sN<460;sN++){ var x=rnd()*1440, y=surfY(x)+10+Math.pow(rnd(),1.25)*385;
+      add(deep,"ellipse",{cx:x.toFixed(1),cy:y.toFixed(1),rx:(0.8+rnd()*2.4).toFixed(1),ry:(0.6+rnd()*1.5).toFixed(1),fill:cols[Math.floor(rnd()*cols.length)],opacity:(0.35+rnd()*0.45).toFixed(2)}); }
+    for(var d=0;d<80;d++){ var x2=rnd()*1440, y2=surfY(x2)+28+rnd()*360, w=10+rnd()*44;
+      add(deep,"path",{d:"M"+x2.toFixed(0)+" "+y2.toFixed(0)+" q"+(w/2).toFixed(0)+" "+(rnd()*4-2).toFixed(1)+" "+w.toFixed(0)+" 0",stroke:rnd()<.5?"#3F2310":"#7A4826","stroke-width":(1+rnd()*1.5).toFixed(1),fill:"none","stroke-linecap":"round",opacity:".5"}); }
+    [[430,1],[1010,-1],[1265,1],[255,-1]].forEach(function(r){ var x=r[0], y=surfY(x), k=r[1];
+      add(deep,"path",{d:"M"+x+" "+(y+4)+" c"+(8*k)+" 18 "+(-10*k)+" 30 "+(4*k)+" 48 s"+(-6*k)+" 26 "+(10*k)+" 40 M"+(x+4*k)+" "+(y+52)+" c"+(14*k)+" 6 "+(18*k)+" 16 "+(26*k)+" 18",stroke:"#3A1F0E","stroke-width":"2.6",fill:"none","stroke-linecap":"round",opacity:".75"}); });
+    function rock(parent,x,y,r,rot){
+      add(parent,"ellipse",{cx:x+r*.1,cy:y+r*.34,rx:r*1.06,ry:r*.6,fill:"#2E190B",opacity:".45"});
+      var tr="rotate("+rot+" "+x+" "+y+")";
+      add(parent,"ellipse",{cx:x,cy:y,rx:r,ry:r*.66,fill:"#8A7767",transform:tr});
+      add(parent,"ellipse",{cx:x+r*.06,cy:y+r*.2,rx:r*.88,ry:r*.42,fill:"#6C5A4C",transform:tr});
+      add(parent,"ellipse",{cx:x-r*.3,cy:y-r*.26,rx:r*.42,ry:r*.18,fill:"#B9A899",opacity:".85",transform:"rotate("+(rot-8)+" "+x+" "+y+")"});
+    }
+    var greens=["#5E9A35","#79B444","#4C8A2B"];
+    [40,118,206,292,382,456,952,1032,1118,1212,1292,1372,1424].forEach(function(x,ti){
+      var y=surfY(x)+3, n=3+Math.floor(rnd()*3);
+      for(var bI=0;bI<n;bI++){ var dx=(bI-(n-1)/2)*5, h=10+rnd()*12, lean=(rnd()-.5)*10+dx*.6;
+        add(top,"path",{d:"M"+(x+dx).toFixed(1)+" "+y.toFixed(1)+" q"+(lean*.3).toFixed(1)+" "+(-h*.5).toFixed(1)+" "+lean.toFixed(1)+" "+(-h).toFixed(1),stroke:greens[(ti+bI)%3],"stroke-width":"3","stroke-linecap":"round",fill:"none"}); }
+    });
+    [[152,-4,17,-6],[1184,-2,14,8],[352,6,9,0],[1338,4,11,-4],[66,4,8,0],[488,1,9,4],[1006,-1,11,-6],[262,3,7,0],[1418,2,8,0],[540,4,6,0]].forEach(function(q){ rock(top,q[0],surfY(q[0])+q[1],q[2],q[3]); });
+  })();
+
+  // Trees on the hills: little pines on the far hill, round trees on the near one (none right behind Sly)
+  (function(){
+    var NS="http://www.w3.org/2000/svg";
+    function add(parent,n,at){ var e=document.createElementNS(NS,n); for(var k in at) e.setAttribute(k,at[k]); parent.appendChild(e); return e; }
+    function sampler(path){ var len=path.getTotalLength(), pts=[]; for(var i=0;i<=360;i++) pts.push(path.getPointAtLength(len*i/360));
+      return function(x){ for(var i=1;i<pts.length;i++){ if(pts[i].x>=x){ var a=pts[i-1],b=pts[i],t=(x-a.x)/Math.max(1e-6,b.x-a.x); return a.y+(b.y-a.y)*t; } } return pts[pts.length-1].y; }; }
+    var far=sampler(document.getElementById("crestFar")), near=sampler(document.getElementById("crestNear"));
+    var tf=document.getElementById("treesFar"), tn=document.getElementById("treesNear");
+    function pine(x,h){ var y=far(x)+5, w=h*.42;
+      add(tf,"rect",{x:(x-1.6).toFixed(1),y:(y-h*.22).toFixed(1),width:"3.2",height:(h*.24).toFixed(1),fill:"#8A7A62"});
+      add(tf,"path",{d:"M"+x+" "+(y-h)+" L"+(x+w)+" "+(y-h*.2)+" L"+(x-w)+" "+(y-h*.2)+" Z",fill:"#8DB27E"});
+      add(tf,"path",{d:"M"+x+" "+(y-h)+" L"+(x+w*.72)+" "+(y-h*.45)+" L"+(x-w*.72)+" "+(y-h*.45)+" Z",fill:"#9DBE8C"});
+      add(tf,"path",{d:"M"+x+" "+(y-h)+" L"+x+" "+(y-h*.2)+" L"+(x+w)+" "+(y-h*.2)+" Z",fill:"#7FA572",opacity:".55"}); }
+    [[120,26],[148,34],[176,24],[400,22],[530,30],[556,38],[584,26],[1004,28],[1030,36],[1058,26],[1180,24],[1330,30],[1356,22]].forEach(function(t){ pine(t[0],t[1]); });
+    function tree(x,r,lean){ var y=near(x)+6, th=r*.9;
+      add(tn,"path",{d:"M"+(x-2.6)+" "+y+" L"+(x-1.8+lean)+" "+(y-th)+" L"+(x+1.8+lean)+" "+(y-th)+" L"+(x+2.6)+" "+y+" Z",fill:"#7A5A3C"});
+      var cy=y-th-r*.55, cx=x+lean;
+      add(tn,"circle",{cx:(cx-r*.5).toFixed(1),cy:(cy+r*.18).toFixed(1),r:(r*.66).toFixed(1),fill:"#7FA866"});
+      add(tn,"circle",{cx:(cx+r*.52).toFixed(1),cy:(cy+r*.2).toFixed(1),r:(r*.62).toFixed(1),fill:"#739C5B"});
+      add(tn,"circle",{cx:cx.toFixed(1),cy:(cy-r*.18).toFixed(1),r:r.toFixed(1),fill:"#86AE6C"});
+      add(tn,"circle",{cx:(cx-r*.32).toFixed(1),cy:(cy-r*.44).toFixed(1),r:(r*.42).toFixed(1),fill:"#9CC07F"}); }
+    function bush(x,r){ var y=near(x)+5;
+      add(tn,"ellipse",{cx:x,cy:y-r*.35,rx:r*1.3,ry:r*.75,fill:"#7FA866"});
+      add(tn,"ellipse",{cx:x-r*.35,cy:y-r*.6,rx:r*.6,ry:r*.4,fill:"#94BA78"}); }
+    [[64,22,1],[176,28,-2],[300,20,1],[436,24,0],[566,18,1],[890,20,-1],[1004,26,1],[1128,30,-1],[1262,22,2],[1384,26,0]].forEach(function(t){ tree(t[0],t[1],t[2]); });
+    [[240,9],[512,8],[948,9],[1196,10],[1330,8]].forEach(function(b){ bush(b[0],b[1]); });
+  })();
+
+  // Build keyboard
+  var kbKeys=[], slots={};
+  ROWS.forEach(function(row,r){
+    var x=0;
+    row.forEach(function(k){
+      var w=k.w||1, el=document.createElement("div");
+      if(k.letter && LIT.indexOf(k.m)>-1){
+        el.className="slot"; slots[k.m]=el;
+      } else {
+        el.className="key"+(k.cls?" "+k.cls:"")+(k.knob?" knob":"");
+        var h="";
+        if(k.knob) h='<span class="dial"></span>';
+        if(k.t) h+='<span class="t">'+k.t+'</span>';
+        if(k.m) h+='<span class="m">'+k.m+'</span>';
+        if(k.tl) h+='<span class="tl">'+k.tl+'</span>';
+        if(k.bl) h+='<span class="bl">'+k.bl+'</span>';
+        if(k.home) h+='<span class="home"></span>';
+        el.innerHTML=h;
+      }
+      kb.appendChild(el);
+      kbKeys.push({el:el,x:x,r:r,w:w});
+      x+=w;
+    });
+  });
+  var strip=document.createElement("div");
+  strip.className="strip";
+  strip.innerHTML='<span class="led"><i></i>caps</span><span class="brand">slyrun</span>';
+  kb.appendChild(strip);
+
+  // Flying keys, in logo order
+  var KEYS=LIT.split("").map(function(c,i){
+    var el=document.createElement("div"); el.className="okey"; el.textContent=c; keysLayer.appendChild(el);
+    return {c:c,i:i,el:el};
+  });
+  // scatter (x,y in key sizes from centre), rotation; logo offsets; stagger
+  var SCATTER={S:[-2.9,0.55,-16],L:[2.15,0.35,-10],Y:[-0.65,1.45,-22],R:[-1.45,-0.65,12],U:[1.0,-0.75,28],N:[1.2,1.7,6]};
+  var LOGO={S:[0.10,-2],L:[-0.30,2],Y:[-0.06,-2],R:[0.08,1],U:[0.05,-1],N:[0.10,2]};
+  var DELAY={S:0,L:0.035,Y:0.015,R:0.005,U:0.025,N:0.045};
+
+  var vw,vh,u,pad,gap,W,H,B,G,kbTop,yLogo,yGround,foxH;
+  function clamp(v,a,b){return Math.max(a,Math.min(b,v));}
+  function seg(p,a,d){return clamp((p-a)/d,0,1);}
+  function ease(t){return t<.5?4*t*t*t:1-Math.pow(-2*t+2,3)/2;}
+  function easeOut(t){return 1-Math.pow(1-t,3);}
+  function back(t){var c1=1.6,c3=c1+1;return 1+c3*Math.pow(t-1,3)+c1*Math.pow(t-1,2);}
+  function lerp(a,b,t){return a+(b-a)*t;}
+
+  function layout(){
+    vw=stage.clientWidth; vh=stage.clientHeight;
+    W=Math.min(1040,vw-32); u=W/16.56; pad=0.28*u; gap=0.075*u; H=6*u+2*pad;
+    kb.style.setProperty("--u",u+"px");
+    kb.style.width=W+"px"; kb.style.height=H+"px";
+    kbKeys.forEach(function(k){
+      var s=k.el.style;
+      s.left=(pad+k.x*u+gap/2)+"px"; s.top=(pad+k.r*u+gap/2)+"px";
+      s.width=(k.w*u-gap)+"px"; s.height=(u-gap)+"px";
+    });
+    strip.style.left=(pad+15*u+gap/2)+"px"; strip.style.top=(pad+gap/2)+"px";
+    strip.style.width=(u-gap)+"px"; strip.style.height=(5*u-gap)+"px";
+    kbTop=vh*0.44-H/2;
+    hint.style.top=(vh*0.44+H/2+28)+"px";
+
+    B=clamp(vw*0.052,44,74); G=B*0.16;
+    keysLayer.style.setProperty("--B",B+"px");
+    yLogo=Math.max(52+34+B/2,vh*0.235);
+    var tagTop=yLogo+B*0.5+B*0.3+16;
+    tagline.style.top=tagTop+"px";
+    yGround=Math.max(vh*0.64,tagTop+40+150);
+    foxH=Math.min(clamp(vh*0.27,150,250),vw*0.5);
+    foxH=Math.min(foxH,yGround-(tagTop+44));
+    fox.style.width=foxH+"px"; fox.style.height=foxH+"px";
+    fox.style.top=(yGround-foxH*0.968)+"px";
+    var gH=vh-yGround, gs=Math.max(vw/1440,gH/400);
+    var hH=clamp(vh*0.38,220,380);
+    hills.style.top=(yGround+24-hH)+"px"; hills.style.height=hH+"px";
+    ground.style.top=(yGround-50*gs)+"px"; ground.style.height=(gH+50*gs)+"px";
+    drifts.forEach(function(el){
+      el.style.width=(parseFloat(el.style.getPropertyValue("--w"))*clamp(vw/1300,0.75,1.1))+"px";
+      el.style.top=(yGround+foxH*parseFloat(el.getAttribute("data-k")))+"px";
+    });
+    var cW=ctaScene.clientWidth, cH=clamp(cW*150/1440,96,170), cs=Math.max(cW/1440,cH/150), cFox=clamp(cW*0.13,120,170);
+    ctaGround.style.height=cH+"px";
+    ctaFox.style.width=cFox+"px"; ctaFox.style.height=cFox+"px";
+    ctaFox.style.bottom=(cH-50*cs-cFox*0.032)+"px";
+    var startTop=yGround+Math.max(36,vh*0.075);
+    startBtn.style.top=startTop+"px";
+    more.style.top=(startTop+80)+"px";
+    render();
+  }
+
+  var p=0;
+  function progress(){
+    var r=track.getBoundingClientRect(), total=track.offsetHeight-stage.offsetHeight;
+    return clamp(-r.top/Math.max(1,total),0,1);
+  }
+
+  function render(){
+    // Keyboard rises and leaves
+    var k1=ease(seg(p,0.03,0.30)), k2=ease(seg(p,0.30,0.20));
+    var ty=-(vh*0.27)*k1-(vh*0.85)*k2, sc=1-0.1*k1;
+    kb.style.top=kbTop+"px";
+    kb.style.transform="translateX(-50%) translateY("+ty+"px) scale("+sc+")";
+    kb.style.opacity=String(1-k2);
+    hint.style.opacity=String(1-seg(p,0,0.03));
+
+    var stageRect=stage.getBoundingClientRect();
+    var rowW=6*B+5*G, x0=vw/2-rowW/2+B/2;
+    KEYS.forEach(function(k){
+      var d=DELAY[k.c];
+      var a=easeOut(seg(p,0.02+d*0.5,0.06));
+      var b=ease(seg(p,0.06+d,0.24));
+      var c=ease(seg(p,0.33+d*0.7,0.22));
+      var sr=slots[k.c].getBoundingClientRect();
+      var sx=sr.left+sr.width/2-stageRect.left, sy=sr.top+sr.height/2-stageRect.top, ss=sr.width/B;
+      var sp=SCATTER[k.c];
+      var cx=vw/2+sp[0]*B, cy=vh*0.52+sp[1]*B;
+      var bob=Math.sin(p*40+k.i*1.7)*B*0.08*b*(1-c);
+      var lx=x0+k.i*(B+G), ly=yLogo+LOGO[k.c][0]*B;
+      // lifted position at the slot
+      var liftY=-0.25*u*a*(1-b);
+      var x=lerp(lerp(sx,cx,b),lx,c);
+      var y=lerp(lerp(sy+liftY,cy+bob,b),ly,c);
+      var s=lerp(lerp(ss*(1+0.14*a),1.04,b),1,c);
+      var rot=lerp(lerp(0,sp[2],b),LOGO[k.c][1],c);
+      k.el.style.transform="translate("+(x-B/2)+"px,"+(y-B/2)+"px) rotate("+rot+"deg) scale("+s+")";
+      var lift=Math.max(a*(1-b)*0.6, b*(1-c));
+      k.el.style.setProperty("--lift",lift.toFixed(3));
+    });
+
+    var t=seg(p,0.52,0.10);
+    tagline.style.opacity=String(t);
+    tagline.style.transform="translateY("+((1-t)*12)+"px)";
+
+    var g=ease(seg(p,0.42,0.24));
+    scene.style.transform="translateY("+((1-g)*vh*0.55)+"px)";
+    sky.style.opacity=String(g);
+    sky.style.height=(yGround+40+(1-g)*vh*0.55)+"px";
+    hills.style.opacity=String(clamp(g*1.4-0.2,0,1));
+    var f=seg(p,0.58,0.14);
+    fox.style.opacity=String(clamp(f*2,0,1));
+    fox.style.transform="translateX(-50%) scale("+(0.6+0.4*back(f))+")";
+
+    var n=easeOut(seg(p,0.68,0.12));
+    nav.style.opacity=String(n);
+    nav.style.transform="translateY("+((n-1)*100)+"%)";
+    nav.style.visibility=n<0.02?"hidden":"visible";
+    more.style.opacity=String(n);
+    startBtn.style.opacity=String(n);
+    startBtn.style.transform="translateX(-50%) translateY("+((1-n)*14)+"px)";
+    startBtn.style.pointerEvents=n>0.6?"auto":"none";
+    startBtn.tabIndex=n>0.6?0:-1;
+  }
+
+  var ticking=false;
+  function onScroll(){ if(ticking) return; ticking=true; requestAnimationFrame(function(){ ticking=false; p=progress(); render(); }); }
+  window.addEventListener("scroll",onScroll,{passive:true});
+  window.addEventListener("resize",function(){ layout(); });
+
+  function start(){
+    startBtn.classList.add("down");
+    setTimeout(function(){ startBtn.classList.remove("down"); },140);
+    fox.classList.remove("hop"); void fox.offsetWidth; fox.classList.add("hop");
+    if(GAME_URL && !coarse){ setTimeout(function(){ window.location.href=GAME_URL; },420); }
+  }
+  startBtn.addEventListener("click",start);
+  document.addEventListener("keydown",function(e){
+    var pinned=track.getBoundingClientRect().bottom>=window.innerHeight-4;
+    if((e.code==="Space"||e.key===" ") && p>0.8 && pinned && !(e.target && /^(INPUT|TEXTAREA|BUTTON|SELECT|A)$/.test(e.target.tagName))){
+      e.preventDefault(); start();
+    }
+  });
+
+  // Self-typing word display in "How to play"
+  (function(){
+    var WORDS=["outrun","ember","hollow","escape","tremor","sly"];
+    var tT=document.getElementById("tTyped"), tC=document.getElementById("tCur"), tR=document.getElementById("tRest"), tN=document.getElementById("tNext");
+    if(reduced) return;
+    var wi=0, ci=0;
+    function draw(){
+      var w=WORDS[wi];
+      tT.textContent=w.slice(0,ci); tC.textContent=w.charAt(ci); tR.textContent=w.slice(ci+1);
+      tN.textContent=WORDS[(wi+1)%WORDS.length]+" · "+WORDS[(wi+2)%WORDS.length];
+    }
+    function tick(){
+      var w=WORDS[wi];
+      if(ci<w.length){ ci++; draw(); setTimeout(tick, 110+Math.random()*90); }
+      else { setTimeout(function(){ wi=(wi+1)%WORDS.length; ci=0; draw(); setTimeout(tick,500); }, 900); }
+    }
+    ci=0; draw(); setTimeout(tick,800);
+  })();
+
+  document.fonts && document.fonts.ready && document.fonts.ready.then(layout);
+  layout(); p=progress(); render();
+})();
+</script>
+
+
+</body>
+</html>
