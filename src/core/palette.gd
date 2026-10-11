@@ -32,6 +32,11 @@ const LIGHT_BOT := Color("#F4F3F1")
 const LIGHT_BORDER := Color("#8F8C88")
 const LIGHT_SHADOW := Color("#B9B6B2")
 
+# Light cards (.cap) and the text on them
+const INK := Color("#1E1B19")
+const MUTED := Color("#5E5954")
+const CARD_BORDER := Color("#CFCAC4")
+
 const NIGHT := Color("#0E0D0C")
 # Not on the website: a red warm enough to sit next to the oranges. Orange already means
 # "current letter", so typos need their own color.
