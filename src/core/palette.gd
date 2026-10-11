@@ -37,6 +37,9 @@ const INK := Color("#1E1B19")
 const MUTED := Color("#5E5954")
 const CARD_BORDER := Color("#CFCAC4")
 
+# Text on the brown ground (.more, the footer)
+const CREAM := Color("#F3E9DD")
+
 const NIGHT := Color("#0E0D0C")
 # Not on the website: a red warm enough to sit next to the oranges. Orange already means
 # "current letter", so typos need their own color.

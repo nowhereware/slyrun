@@ -2,8 +2,8 @@
 
 [ext_resource type="Script" uid="uid://bhdn26bc0yn1p" path="res://src/menus/title/title.gd" id="1_l6cm7"]
 [ext_resource type="PackedScene" uid="uid://bax45fj3f1f1j" path="res://src/world/parallax_world.tscn" id="5_world"]
-[ext_resource type="Texture2D" uid="uid://ol25tnww4i1a" path="res://assets/art/ui/Logo.png" id="3_bqqt6"]
-[ext_resource type="Texture2D" uid="uid://c0iykrd0e6cpx" path="res://assets/art/ui/Play.png" id="4_wu84c"]
+[ext_resource type="PackedScene" uid="uid://mo7fy7k3yb15" path="res://src/ui/keycap_logo.tscn" id="6_logo"]
+[ext_resource type="FontFile" uid="uid://nlc406sotp6p" path="res://assets/fonts/IBMPlexMono-Medium.ttf" id="7_medium"]
 
 [sub_resource type="ButtonGroup" id="ButtonGroup_mode"]
 
@@ -14,60 +14,107 @@ script = ExtResource("1_l6cm7")
 
 [node name="World" parent="." unique_id=656216509 instance=ExtResource("5_world")]
 
-[node name="Logo" type="Sprite2D" parent="." unique_id=1627011566]
-position = Vector2(575, 108.00001)
-scale = Vector2(0.1, 0.1)
-texture = ExtResource("3_bqqt6")
+[node name="UI" type="CanvasLayer" parent="." unique_id=263457879]
 
-[node name="PlayButton" type="TextureButton" parent="." unique_id=100067510]
-offset_left = 475.00003
-offset_top = 301.0
-offset_right = 1226.0
-offset_bottom = 1079.0
-scale = Vector2(0.3, 0.3)
-texture_normal = ExtResource("4_wu84c")
-texture_pressed = ExtResource("4_wu84c")
-texture_hover = ExtResource("4_wu84c")
-texture_focused = ExtResource("4_wu84c")
+[node name="Menu" type="VBoxContainer" parent="UI" unique_id=842668188]
+anchors_preset = 5
+anchor_left = 0.5
+anchor_right = 0.5
+offset_top = 64.0
+grow_horizontal = 2
+theme_override_constants/separation = 12
 
-[node name="ModeButtons" type="HBoxContainer" parent="." unique_id=795425564]
-offset_left = 470.0
-offset_top = 556.0
-offset_right = 690.0
-offset_bottom = 587.0
-
-[node name="Journey" type="Button" parent="ModeButtons" unique_id=2135525362]
+[node name="Logo" parent="UI/Menu" unique_id=1385335775 instance=ExtResource("6_logo")]
 layout_mode = 2
+size_flags_horizontal = 4
+
+[node name="Tagline" type="Label" parent="UI/Menu" unique_id=1914303894]
+layout_mode = 2
+theme_override_colors/font_color = Color(0.7607843, 0.25490198, 0.047058824, 1)
+theme_override_fonts/font = ExtResource("7_medium")
+theme_override_font_sizes/font_size = 22
+text = "Help Sly escape the doom!"
+horizontal_alignment = 1
+
+[node name="Spacer" type="Control" parent="UI/Menu" unique_id=1400815750]
+custom_minimum_size = Vector2(0, 196)
+layout_mode = 2
+
+[node name="PlayButton" type="Button" parent="UI/Menu" unique_id=100067510]
+layout_mode = 2
+size_flags_horizontal = 4
+focus_mode = 0
+theme_type_variation = &"KeycapLight"
+text = "Press space to start"
+
+[node name="ModeRow" type="HBoxContainer" parent="UI/Menu" unique_id=719758287]
+layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="ModeCaption" type="Label" parent="UI/Menu/ModeRow" unique_id=286255415]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9529412, 0.9137255, 0.8666667, 1)
+theme_override_font_sizes/font_size = 15
+text = "Mode"
+
+[node name="ModeButtons" type="HBoxContainer" parent="UI/Menu/ModeRow" unique_id=795425564]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Journey" type="Button" parent="UI/Menu/ModeRow/ModeButtons" unique_id=2135525362]
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"KeycapMini"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_mode")
 text = "Journey"
 
-[node name="Timed" type="Button" parent="ModeButtons" unique_id=423946139]
+[node name="Timed" type="Button" parent="UI/Menu/ModeRow/ModeButtons" unique_id=423946139]
 layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"KeycapMini"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_mode")
 text = "Timed"
 
-[node name="LengthButtons" type="HBoxContainer" parent="." unique_id=947876999]
-offset_left = 470.0
-offset_top = 598.0
-offset_right = 690.0
-offset_bottom = 629.0
-
-[node name="Length30" type="Button" parent="LengthButtons" unique_id=1497871144]
+[node name="LengthRow" type="HBoxContainer" parent="UI/Menu" unique_id=1195957593]
 layout_mode = 2
+theme_override_constants/separation = 8
+alignment = 1
+
+[node name="LengthCaption" type="Label" parent="UI/Menu/LengthRow" unique_id=2091276978]
+custom_minimum_size = Vector2(64, 0)
+layout_mode = 2
+theme_override_colors/font_color = Color(0.9529412, 0.9137255, 0.8666667, 1)
+theme_override_font_sizes/font_size = 15
+text = "Length"
+
+[node name="LengthButtons" type="HBoxContainer" parent="UI/Menu/LengthRow" unique_id=947876999]
+layout_mode = 2
+theme_override_constants/separation = 8
+
+[node name="Length30" type="Button" parent="UI/Menu/LengthRow/LengthButtons" unique_id=1497871144]
+layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"KeycapMini"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_length")
 text = "30 s"
 
-[node name="Length60" type="Button" parent="LengthButtons" unique_id=203694312]
+[node name="Length60" type="Button" parent="UI/Menu/LengthRow/LengthButtons" unique_id=203694312]
 layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"KeycapMini"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_length")
 text = "1 min"
 
-[node name="Length120" type="Button" parent="LengthButtons" unique_id=255555737]
+[node name="Length120" type="Button" parent="UI/Menu/LengthRow/LengthButtons" unique_id=255555737]
 layout_mode = 2
+focus_mode = 0
+theme_type_variation = &"KeycapMini"
 toggle_mode = true
 button_group = SubResource("ButtonGroup_length")
 text = "2 min"
