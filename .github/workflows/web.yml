@@ -51,8 +51,20 @@ jobs:
       - name: Put Godot on PATH
         run: echo "$HOME/godot" >> "$GITHUB_PATH"
 
+      # On a fresh clone Godot loads the project theme before the first import has created the
+      # fonts it uses, so it logs errors before the file scan starts. Check the first import from
+      # the scan on (every file's first import), then a second import in full (startup, theme).
       - name: Import assets
-        run: godot --headless --path . --import 2>&1 | tee import.log
+        run: |
+          godot --headless --path . --import 2>&1 | tee import-first.log
+          marker="first_scan_filesystem"
+          if grep -q "$marker" import-first.log; then
+            sed -n "/$marker/,\$p" import-first.log > import.log
+          else
+            echo "::warning::'$marker' not found in the first import log; checking all of it."
+            cp import-first.log import.log
+          fi
+          godot --headless --path . --import 2>&1 | tee -a import.log
 
       # The export doesn't compile scripts, so a broken script would otherwise pass.
       - name: Check scripts and scenes
