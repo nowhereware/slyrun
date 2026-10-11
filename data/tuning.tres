@@ -1,0 +1,20 @@
+[gd_resource type="Resource" script_class="Tuning" format=3]
+
+[ext_resource type="Script" path="res://src/core/tuning.gd" id="1_tuning"]
+
+[resource]
+script = ExtResource("1_tuning")
+head_start_s = 4.0
+wpm_window_s = 3.0
+default_baseline_wpm = 40.0
+calibration_length_s = 30.0
+distance_multiplier = 10.0
+easy_multiplier = 0.75
+medium_multiplier = 0.9
+hard_multiplier = 1.05
+survival_ramp_interval_s = 10.0
+landscape_interval_s = 30.0
+freeze_hollow_speed = 0.5
+warning_gap_s = 3.0
+danger_gap_s = 2.0
+critical_gap_s = 1.0
