@@ -21,9 +21,9 @@ var velocity: Vector2
 func _ready() -> void:
 	seed(int(Time.get_unix_time_from_system()))
 	current_letter = 0
-	font = load("res://assets/courierprime.ttf")
+	font = load("res://assets/fonts/courierprime.ttf")
 	# Load first word
-	var file = FileAccess.open("res://assets/6letters.csv", FileAccess.READ)
+	var file = FileAccess.open("res://data/words/6letters.csv", FileAccess.READ)
 	var letter6 = file.get_as_text()
 	file.close()
 	lines = letter6.split("\n")
