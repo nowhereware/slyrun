@@ -46,9 +46,15 @@ func _ready() -> void:
 	$Fox.play("default")
 
 	$HUD/ModeBox/ModeLabel.text = "Mode: " + GameState.mode_label()
+	$HUD/GameOverUI/Margin/Results/PlayAgain.pressed.connect(play_again)
 
 func _input(event: InputEvent) -> void:
 	if (run_over):
+		# Once the results are up, only Space or Enter does anything: play again. Key repeats are
+		# ignored so a held key can't skip the results.
+		if (event is InputEventKey and event.pressed and !event.is_echo()
+				and event.keycode in [KEY_SPACE, KEY_ENTER, KEY_KP_ENTER]):
+			play_again()
 		return
 	if (event is InputEventKey and !event.is_echo() and !event.is_released()):
 		event = event as InputEventKey
@@ -117,14 +123,19 @@ func end_run(reason: String) -> void:
 	run_over = true
 	$World.set_paused(true)
 	$HUD/WordBox.hide()
-	$GameOverUI/GameOverText.text = "Sly made it!" if reason == "time_up" else "Game Over!"
+	var results := $HUD/GameOverUI/Margin/Results
+	results.get_node("GameOverText").text = "Sly made it!" if reason == "time_up" else "Game Over!"
 	@warning_ignore("integer_division")
-	$GameOverUI/WPMLabel.text = "Words per Minute: %d" % (words_completed / max((int(time_elapsed) / 60), 1))
+	results.get_node("Stats/WPM/WPMLabel").text = "%d" % (words_completed / max((int(time_elapsed) / 60), 1))
 	if (total_letters == 0):
-		$GameOverUI/AccuracyLabel.text = "Accuracy: -"
+		results.get_node("Stats/Accuracy/AccuracyLabel").text = "-"
 	else:
-		$GameOverUI/AccuracyLabel.text = "Accuracy: %.01f" % ((float(correct_letters) / float(total_letters)) * 100)
-	$GameOverUI.show()
+		results.get_node("Stats/Accuracy/AccuracyLabel").text = "%.01f%%" % ((float(correct_letters) / float(total_letters)) * 100)
+	$HUD/GameOverUI.show()
+
+# Back to the title, which still has the mode and length chosen for this run (GameState keeps them).
+func play_again() -> void:
+	Router.goto_title()
 
 func add_health():
 	if (health < 3):
