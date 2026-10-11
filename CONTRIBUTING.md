@@ -23,6 +23,20 @@ The error check should print only the Godot version line. Any `ERROR` or `WARNIN
 
 After any of these, `git status` should show only the changes you meant to make. If Godot generated new `.uid` or `.import` files for files you added, commit them.
 
+## Web build and preview
+
+The website is `site/index.html`. Its Play links and Space key open the game at `site/play/`, which the web export creates. That folder is generated and git-ignored, so never edit or commit it.
+
+One-time setup: install the Godot 4.7.x export templates (Editor → Manage Export Templates → Download). Only the web templates are needed.
+
+| What | Command |
+| --- | --- |
+| Build the game into `site/play/` | `tools/build_web.sh` |
+| Build, then open the website and game in your browser at `http://localhost:8000/` (Ctrl-C to stop) | `tools/preview_web.sh` |
+| The same, on another port if 8000 is busy | `PORT=8001 tools/preview_web.sh` |
+
+Both scripts find Godot from `$GODOT`, then `godot` on your PATH, then `/Applications/Godot.app`.
+
 ## Branches
 
 - Branch off `main` with your owner prefix: `p1/gap-controller`, `p2/run-setup`, `p3/sly-run-cycle`.
