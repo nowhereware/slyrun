@@ -1,11 +1,11 @@
 extends Node2D
 
-
 # Called when the node enters the scene tree for the first time.
 func _ready() -> void:
-	Router.goto_run()
-	pass # Replace with function body.
+	$PlayButton.button_down.connect(onPlayButtonPress)
 
+func onPlayButtonPress():
+	Router.goto_run()
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:

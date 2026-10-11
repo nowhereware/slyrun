@@ -27,7 +27,7 @@ func _ready() -> void:
 	var letter6 = file.get_as_text()
 	file.close()
 	lines = letter6.split("\n")
-	var line = randi() % 1000
+	var line = randi() % lines.size()
 	current_word = lines[line]
 	$CurrentWord.push_font(font)
 	$CurrentWord.push_font_size(FONT_SIZE)
@@ -46,6 +46,12 @@ func _ready() -> void:
 	grace_timer.one_shot = true
 	add_child(grace_timer)
 	health = 3
+	
+	$Tornado.autoplay = "default"
+	$Tornado.play("default")
+	
+	$Fox.autoplay = "default"
+	$Fox.play("default")
 
 func _input(event: InputEvent) -> void:
 	if (event is InputEventKey and !event.is_echo() and !event.is_released()):
@@ -55,7 +61,7 @@ func _input(event: InputEvent) -> void:
 			if (current_letter == current_word.length()):
 				# Load a new word.
 				current_letter = 0
-				var line = randi() % 1000
+				var line = randi() % lines.size()
 				current_word = lines[line]
 				words_completed += 1
 				add_health()
@@ -92,9 +98,15 @@ func _input(event: InputEvent) -> void:
 func remove_health():
 	health -= 1
 	
-	velocity = Vector2(-50, 0)
+	velocity = Vector2(-10, 0)
 	
-	if (health == 0):
+	if (health == 2):
+		$Fox.position.x = 500
+	elif (health == 1):
+		# Move tornado.
+		pass
+	elif (health == 0):
+		$Fox.position.x = 200
 		$CurrentWord.hide()
 		$GameOverUI.show()
 		@warning_ignore("integer_division")
@@ -104,6 +116,10 @@ func remove_health():
 func add_health():
 	if (health < 3):
 		health += 1
+	if (health == 3):
+		$Fox.position.x = 920
+	elif (health == 2):
+		$Fox.position.x = 500
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
@@ -111,8 +127,8 @@ func _process(delta: float) -> void:
 		time_elapsed += delta
 	
 	if (velocity.x != 0):
-		$Fox.position.x -= 5
-		
+		$Fox.position.x -= 2
+		velocity.x += 2
 	
 	@warning_ignore("integer_division")
 	var minutes = int(time_elapsed) / 60
