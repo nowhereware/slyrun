@@ -118,6 +118,7 @@ func end_run(reason: String) -> void:
 	if (run_over):
 		return
 	run_over = true
+	$World.set_paused(true)
 	$CurrentWord.hide()
 	$GameOverUI/GameOverText.text = "Sly made it!" if reason == "time_up" else "Game Over!"
 	@warning_ignore("integer_division")

@@ -2,7 +2,7 @@
 
 [ext_resource type="Script" uid="uid://bys53hkt5n4c7" path="res://src/run/run.gd" id="1_7nptk"]
 [ext_resource type="LabelSettings" uid="uid://b5fy2cfuqd5dr" path="res://assets/fonts/label_settings.tres" id="2_ipuqq"]
-[ext_resource type="Texture2D" uid="uid://bqe3u1loes143" path="res://assets/art/world/background.png" id="2_or4b6"]
+[ext_resource type="PackedScene" uid="uid://bax45fj3f1f1j" path="res://src/world/parallax_world.tscn" id="20_world"]
 [ext_resource type="FontFile" uid="uid://vqnlwy3s5bfc" path="res://assets/fonts/courierprime.ttf" id="3_h5xqe"]
 [ext_resource type="Texture2D" uid="uid://b70n625lra5fy" path="res://assets/art/sly/run/0.png" id="3_sbksv"]
 [ext_resource type="Texture2D" uid="uid://colwhyewc6dvs" path="res://assets/art/sly/run/1.png" id="4_kfjf5"]
@@ -160,21 +160,10 @@ animations = [{
 [node name="InGame" type="Node2D" unique_id=707985964]
 script = ExtResource("1_7nptk")
 
-[node name="Sky" type="Parallax2D" parent="." unique_id=2108714000]
-scroll_scale = Vector2(0.1, 0.1)
-repeat_size = Vector2(1468.5, 900)
-autoscroll = Vector2(-25, 0)
-repeat_times = 2
-
-[node name="Sprite2D" type="Sprite2D" parent="Sky" unique_id=1097274910]
-position = Vector2(544, 340)
-scale = Vector2(1.525, 1.5)
-texture = ExtResource("2_or4b6")
-
-[node name="Ground" type="Parallax2D" parent="." unique_id=970831227]
+[node name="World" parent="." unique_id=724397381 instance=ExtResource("20_world")]
 
 [node name="Fox" type="AnimatedSprite2D" parent="." unique_id=1399206653]
-position = Vector2(859, 421)
+position = Vector2(859, 360)
 sprite_frames = SubResource("SpriteFrames_h5xqe")
 frame_progress = 0.31348458
 
@@ -238,5 +227,5 @@ text = "Accuracy: "
 label_settings = SubResource("LabelSettings_h5xqe")
 
 [node name="Tornado" type="AnimatedSprite2D" parent="." unique_id=937747487]
-position = Vector2(-2, 372)
+position = Vector2(-2, 234)
 sprite_frames = SubResource("SpriteFrames_w46pu")

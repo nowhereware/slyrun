@@ -1,0 +1,74 @@
+[gd_scene format=3 uid="uid://bax45fj3f1f1j"]
+
+[ext_resource type="Script" uid="uid://b6tc67bepvsu5" path="res://src/world/parallax_world.gd" id="1_world"]
+[ext_resource type="Texture2D" uid="uid://bqp4128lsku02" path="res://assets/art/world/sky.svg" id="2_sky"]
+[ext_resource type="Texture2D" uid="uid://dqv2vax8u21ru" path="res://assets/art/world/sun.svg" id="3_sun"]
+[ext_resource type="Texture2D" uid="uid://bufah66vi0rhb" path="res://assets/art/world/cloud.svg" id="4_cloud"]
+[ext_resource type="Texture2D" uid="uid://cnwxuhiulvk7k" path="res://assets/art/world/hills_loop.svg" id="5_hills"]
+[ext_resource type="Texture2D" uid="uid://wsfgcbj4rpg0" path="res://assets/art/world/ground_loop.svg" id="6_ground"]
+
+[node name="ParallaxWorld" type="Node2D" unique_id=1071477686]
+script = ExtResource("1_world")
+
+[node name="Sky" type="Sprite2D" parent="." unique_id=1959167398]
+scale = Vector2(4, 1)
+texture = ExtResource("2_sky")
+centered = false
+
+[node name="Sun" type="Sprite2D" parent="." unique_id=1302102035]
+position = Vector2(1008, 118)
+texture = ExtResource("3_sun")
+
+[node name="Clouds" type="Parallax2D" parent="." unique_id=1940099285]
+repeat_size = Vector2(1600, 0)
+autoscroll = Vector2(-10, 0)
+
+[node name="Cloud1" type="Sprite2D" parent="Clouds" unique_id=2084727110]
+modulate = Color(1, 1, 1, 1.0)
+position = Vector2(180, 96)
+scale = Vector2(1.0, 1.0)
+texture = ExtResource("4_cloud")
+
+[node name="Cloud2" type="Sprite2D" parent="Clouds" unique_id=1777652994]
+modulate = Color(1, 1, 1, 0.85)
+position = Vector2(620, 150)
+scale = Vector2(0.7, 0.7)
+texture = ExtResource("4_cloud")
+
+[node name="Cloud3" type="Sprite2D" parent="Clouds" unique_id=1099975904]
+modulate = Color(1, 1, 1, 0.9)
+position = Vector2(1040, 70)
+scale = Vector2(0.85, 0.85)
+texture = ExtResource("4_cloud")
+
+[node name="Cloud4" type="Sprite2D" parent="Clouds" unique_id=1070302523]
+modulate = Color(1, 1, 1, 0.75)
+position = Vector2(1400, 130)
+scale = Vector2(0.6, 0.6)
+texture = ExtResource("4_cloud")
+
+[node name="Hills" type="Parallax2D" parent="." unique_id=1190580830]
+repeat_size = Vector2(2304, 0)
+autoscroll = Vector2(-24, 0)
+
+[node name="Sprite" type="Sprite2D" parent="Hills" unique_id=1936196520]
+position = Vector2(0, 188)
+texture = ExtResource("5_hills")
+centered = false
+
+[node name="Soil" type="ColorRect" parent="." unique_id=1361399321]
+offset_left = -2400.0
+offset_top = 740.0
+offset_right = 4800.0
+offset_bottom = 2400.0
+mouse_filter = 2
+color = Color(0.24313726, 0.13725491, 0.06666667, 1)
+
+[node name="Ground" type="Parallax2D" parent="." unique_id=507811516]
+repeat_size = Vector2(2304, 0)
+autoscroll = Vector2(-90, 0)
+
+[node name="Sprite" type="Sprite2D" parent="Ground" unique_id=496555068]
+position = Vector2(0, 388)
+texture = ExtResource("6_ground")
+centered = false
