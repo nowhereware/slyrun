@@ -2,8 +2,8 @@ extends Node2D
 
 var current_letter: int
 var current_word: String
-# The two words waiting after current_word, shown under it.
-var next_words: Array[String] = []
+# The word waiting after current_word, shown under it.
+var next_word: String
 var lines
 
 var total_letters: int
@@ -28,7 +28,7 @@ func _ready() -> void:
 	# Skip empty lines: the file ends with a newline, and an empty "word" breaks the next keypress.
 	lines = letter6.split("\n", false)
 	current_word = draw_word()
-	next_words = [draw_word(), draw_word()]
+	next_word = draw_word()
 	render_word(false)
 	total_letters = 0
 	correct_letters = 0
@@ -61,10 +61,10 @@ func _input(event: InputEvent) -> void:
 		if (event.as_text_keycode().to_lower() == current_word[current_letter].to_lower()):
 			current_letter += 1
 			if (current_letter == current_word.length()):
-				# The first waiting word comes up, and a new one is drawn to wait behind the other.
+				# The waiting word comes up, and a new one is drawn to wait behind it.
 				current_letter = 0
-				current_word = next_words.pop_front()
-				next_words.append(draw_word())
+				current_word = next_word
+				next_word = draw_word()
 				words_completed += 1
 				add_health()
 			
@@ -83,7 +83,7 @@ func draw_word() -> String:
 	return lines[randi() % lines.size()]
 
 # Typed letters bold and black, the current letter underlined in orange (red after a typo),
-# the rest grey. The two waiting words go underneath.
+# the rest grey. The waiting word goes underneath.
 func render_word(typo: bool) -> void:
 	var word: RichTextLabel = $HUD/WordBox/Word/CurrentWord
 	word.clear()
@@ -100,7 +100,7 @@ func render_word(typo: bool) -> void:
 	word.push_color(Palette.LEGEND_DIM)
 	word.add_text(current_word.substr(current_letter + 1))
 	word.pop()
-	$HUD/WordBox/Word/NextWords.text = " · ".join(next_words)
+	$HUD/WordBox/Word/NextWord.text = next_word
 
 func remove_health():
 	health -= 1

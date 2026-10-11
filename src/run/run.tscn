@@ -204,11 +204,11 @@ fit_content = true
 scroll_active = false
 autowrap_mode = 0
 
-[node name="NextWords" type="Label" parent="HUD/WordBox/Word" unique_id=721965773]
+[node name="NextWord" type="Label" parent="HUD/WordBox/Word" unique_id=721965773]
 layout_mode = 2
 theme_override_colors/font_color = Color(0.36862746, 0.34901962, 0.32941177, 1)
 theme_override_font_sizes/font_size = 18
-text = "ember · hollow"
+text = "ember"
 horizontal_alignment = 1
 
 [node name="GameOverUI" type="PanelContainer" parent="HUD" unique_id=759016216]
