@@ -13,6 +13,8 @@ config_version=5
 config/name="slyrun"
 run/main_scene="res://src/menus/title/title.tscn"
 config/features=PackedStringArray("4.7", "GL Compatibility")
+boot_splash/bg_color=Color(0.05490196, 0.050980393, 0.047058824, 1)
+boot_splash/show_image=false
 config/icon="res://icon.svg"
 
 [autoload]
