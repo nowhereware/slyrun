@@ -1,7 +1,7 @@
 [gd_resource type="LabelSettings" format=3 uid="uid://b5fy2cfuqd5dr"]
 
-[ext_resource type="FontFile" uid="uid://vqnlwy3s5bfc" path="res://assets/fonts/courierprime.ttf" id="1_55lj5"]
+[ext_resource type="FontFile" uid="uid://dxopcnv0rsids" path="res://assets/fonts/IBMPlexMono-Regular.ttf" id="1_li8ak"]
 
 [resource]
-font = ExtResource("1_55lj5")
+font = ExtResource("1_li8ak")
 font_size = 32
