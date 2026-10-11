@@ -2,6 +2,27 @@
 
 Godot 4.7, GL Compatibility, Web export.
 
+## Running the game
+
+Install Godot 4.7.x, the standard build (not .NET), from https://godotengine.org/download or the [GitHub releases](https://github.com/godotengine/godot/releases). On macOS the binary is inside the app bundle:
+
+```sh
+GODOT=/Applications/Godot.app/Contents/MacOS/Godot
+```
+
+From the repo root:
+
+| What | Command |
+| --- | --- |
+| Import assets (first run after cloning, or after adding files) | `$GODOT --headless --path . --import` |
+| Error check: run about 5 s with no window, read the output | `$GODOT --headless --path . --quit-after 300` |
+| Play in a window | `$GODOT --path .` |
+| Open the editor | `$GODOT --path . -e` |
+
+The error check should print only the Godot version line. Any `ERROR` or `WARNING` means something is broken. Fix it before merging.
+
+After any of these, `git status` should show only the changes you meant to make. If Godot generated new `.uid` or `.import` files for files you added, commit them.
+
 ## Branches
 
 - Branch off `main` with your owner prefix: `p1/gap-controller`, `p2/run-setup`, `p3/sly-run-cycle`.
