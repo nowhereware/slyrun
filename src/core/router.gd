@@ -16,6 +16,10 @@ func goto_run() -> void:
 
 
 func _goto(path: String) -> void:
-	var err := get_tree().change_scene_to_file(path)
-	if err != OK:
-		push_error("Router: couldn't open %s (error %d)." % [path, err])
+	# Deferred calls drop the return code, so check the scene exists up front.
+	if not ResourceLoader.exists(path):
+		push_error("Router: scene %s doesn't exist; staying on the current screen." % path)
+		return
+	# Deferred so screens can route from their own _ready() without hitting
+	# "Parent node is busy adding/removing children".
+	get_tree().change_scene_to_file.call_deferred(path)
