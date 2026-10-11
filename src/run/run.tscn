@@ -1,10 +1,10 @@
 [gd_scene format=3 uid="uid://4d37074pw4oh"]
 
-[ext_resource type="Script" uid="uid://boickt0b7ofh2" path="res://src/run/run.gd" id="1_7nptk"]
-[ext_resource type="Texture2D" uid="uid://ckbkyknl16lmr" path="res://assets/art/sly/temp_fox.png" id="2_cela1"]
+[ext_resource type="Script" uid="uid://bys53hkt5n4c7" path="res://src/run/run.gd" id="1_7nptk"]
+[ext_resource type="Texture2D" uid="uid://brm7xv58784sd" path="res://assets/art/sly/temp_fox.png" id="2_cela1"]
 [ext_resource type="LabelSettings" uid="uid://b5fy2cfuqd5dr" path="res://assets/fonts/label_settings.tres" id="2_ipuqq"]
-[ext_resource type="FontFile" uid="uid://bj74us8y5t4cx" path="res://assets/fonts/courierprime.ttf" id="3_h5xqe"]
-[ext_resource type="Texture2D" uid="uid://dfm4oinawkpmf" path="res://assets/art/world/temp_scroll.png" id="4_5gm6p"]
+[ext_resource type="FontFile" uid="uid://vqnlwy3s5bfc" path="res://assets/fonts/courierprime.ttf" id="3_h5xqe"]
+[ext_resource type="Texture2D" uid="uid://jn2wxo8npxc0" path="res://assets/art/world/temp_scroll.png" id="4_5gm6p"]
 
 [sub_resource type="SpriteFrames" id="SpriteFrames_h5xqe"]
 animations = [{
