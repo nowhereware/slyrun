@@ -16,6 +16,7 @@ jobs:
   build:
     name: Export web build
     runs-on: ubuntu-24.04
+    timeout-minutes: 15
     defaults:
       run:
         # Explicit bash turns on pipefail, so a failure before `| tee` still fails the step.
@@ -53,13 +54,23 @@ jobs:
       - name: Import assets
         run: godot --headless --path . --import 2>&1 | tee import.log
 
+      # The export doesn't compile scripts, so a broken script would otherwise pass.
+      - name: Check scripts and scenes
+        run: |
+          mapfile -t scripts < <(git ls-files '*.gd' | sed 's#^#res://#')
+          godot --headless --path . --script res://tools/check_scripts.gd -- "${scripts[@]}" 2>&1 | tee checks.log
+          for scene in $(git ls-files '*.tscn'); do
+            echo "== $scene"
+            godot --headless --path . "res://$scene" --quit-after 300 2>&1
+          done | tee -a checks.log
+
       - name: Export web build
         run: tools/build_web.sh 2>&1 | tee build.log
 
       - name: Fail on Godot errors
         run: |
-          if grep -n "ERROR" import.log build.log; then
-            echo "::error::Godot printed ERROR lines during import or export (listed above)."
+          if grep -n "ERROR" import.log checks.log build.log; then
+            echo "::error::Godot printed ERROR lines during import, checks or export (listed above)."
             exit 1
           fi
           if [[ ! -f site/play/index.pck ]]; then
