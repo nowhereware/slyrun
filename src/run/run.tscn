@@ -186,6 +186,14 @@ offset_bottom = 52.0
 text = "99:99"
 label_settings = ExtResource("2_ipuqq")
 
+[node name="ModeLabel" type="Label" parent="." unique_id=1437671202]
+offset_left = 16.0
+offset_top = 16.0
+offset_right = 316.0
+offset_bottom = 52.0
+text = "Mode: Timed"
+label_settings = ExtResource("2_ipuqq")
+
 [node name="CurrentWord" type="RichTextLabel" parent="." unique_id=247813977]
 offset_left = 533.0
 offset_top = 107.0

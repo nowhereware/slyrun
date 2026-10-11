@@ -14,6 +14,8 @@ const FONT_SIZE = 24
 
 var grace_timer: Timer
 var health: int
+# Set by end_run(); after that, typing and the clock stop.
+var run_over := false
 
 var velocity: Vector2
 
@@ -51,7 +53,11 @@ func _ready() -> void:
 	
 	$Fox.play("default")
 
+	$ModeLabel.text = "Mode: " + GameState.mode_label()
+
 func _input(event: InputEvent) -> void:
+	if (run_over):
+		return
 	if (event is InputEventKey and !event.is_echo() and !event.is_released()):
 		event = event as InputEventKey
 		if (event.as_text_keycode().to_lower() == current_word[current_letter].to_lower()):
@@ -105,11 +111,22 @@ func remove_health():
 		pass
 	elif (health == 0):
 		$Fox.position.x = 200
-		$CurrentWord.hide()
-		$GameOverUI.show()
-		@warning_ignore("integer_division")
-		$GameOverUI/WPMLabel.text = "Words per Minute: %d" % (words_completed / max((int(time_elapsed) / 60), 1))
+		end_run("caught")
+
+# The one place a run ends: "caught" (out of health) or "time_up" (a Timed run finished).
+func end_run(reason: String) -> void:
+	if (run_over):
+		return
+	run_over = true
+	$CurrentWord.hide()
+	$GameOverUI/GameOverText.text = "Sly made it!" if reason == "time_up" else "Game Over!"
+	@warning_ignore("integer_division")
+	$GameOverUI/WPMLabel.text = "Words per Minute: %d" % (words_completed / max((int(time_elapsed) / 60), 1))
+	if (total_letters == 0):
+		$GameOverUI/AccuracyLabel.text = "Accuracy: -"
+	else:
 		$GameOverUI/AccuracyLabel.text = "Accuracy: %.01f" % ((float(correct_letters) / float(total_letters)) * 100)
+	$GameOverUI.show()
 
 func add_health():
 	if (health < 3):
@@ -121,17 +138,26 @@ func add_health():
 
 # Called every frame. 'delta' is the elapsed time since the previous frame.
 func _process(delta: float) -> void:
-	if (health != 0):
+	if (!run_over):
 		time_elapsed += delta
-	
+
 	if (velocity.x != 0):
 		$Fox.position.x -= 2
 		velocity.x += 2
-	
+
+	# Journey counts up. Timed counts down, rounding up so it starts on the full length
+	# and reads 00:00 only once time is up.
+	var shown_seconds: int
+	if (GameState.mode == GameState.Mode.TIMED):
+		var time_left: float = max(GameState.timed_length_s - time_elapsed, 0.0)
+		shown_seconds = ceili(time_left)
+		if (time_left <= 0.0):
+			end_run("time_up")
+	else:
+		shown_seconds = int(time_elapsed)
+
 	@warning_ignore("integer_division")
-	var minutes = int(time_elapsed) / 60
-	var seconds = int(time_elapsed) % 60
-	
+	var minutes = shown_seconds / 60
+	var seconds = shown_seconds % 60
+
 	$TimerLabel.text = "%02d:%02d" % [minutes, seconds]
-	
-	pass
