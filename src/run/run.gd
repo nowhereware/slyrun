@@ -47,10 +47,8 @@ func _ready() -> void:
 	add_child(grace_timer)
 	health = 3
 	
-	$Tornado.autoplay = "default"
 	$Tornado.play("default")
 	
-	$Fox.autoplay = "default"
 	$Fox.play("default")
 
 func _input(event: InputEvent) -> void:
