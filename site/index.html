@@ -267,7 +267,7 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
   <ul>
     <li><a href="#track" aria-current="page">Home</a></li>
     <li><a class="play" href="play/">Play</a></li>
-    <li><a href="about/">About Sly</a></li>
+    <li><a href="#sly">About Sly</a></li>
     <li data-flag="leaderboard"><a href="leaderboard/">Leaderboard</a></li>
   </ul>
   <a class="profile" href="profile/" aria-label="Profile" data-flag="profile">
@@ -367,8 +367,8 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
       <span class="eyebrow">modes</span>
       <h2 class="h2" id="modes-h">Pick your run</h2>
       <div class="grid3">
-        <article class="cap"><span class="tag">30 s · 1 min · 2 min</span><h3>Timed Journey</h3><p>Reach the finish line before the Hollow reaches you. Your score is your WPM.</p></article>
-        <article class="cap"><span class="tag">Until you're caught</span><h3>Survival</h3><p>The Hollow speeds up every 10 seconds. Every run ends. Your score is how far you got, in meters.</p></article>
+        <article class="cap"><span class="tag">30 s · 1 min · 2 min</span><h3>Timed</h3><p>Reach the finish line before the Hollow reaches you. Your score is your WPM.</p></article>
+        <article class="cap"><span class="tag">Until you're caught</span><h3>Journey</h3><p>The Hollow speeds up every 10 seconds. Every run ends. Your score is how far you got, in meters.</p></article>
         <article class="cap dark"><span class="tag">Fixed speeds</span><h3>Ranked</h3><p>The Hollow hunts at 30, 50 or 70 WPM, the same for everyone. Ranked scores go on the leaderboard.</p></article>
       </div>
       <div class="options">
@@ -412,7 +412,7 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
     <div class="wrap">
       <span class="eyebrow">leaderboard</span>
       <h2 class="h2" id="board-h">Who outran it furthest</h2>
-      <p class="lead">Top 5 ranked runs · Survival · Medium</p>
+      <p class="lead">Top 5 ranked runs · Journey · Medium</p>
       <div class="cap board">
         <div class="brow head"><span>Rank</span><span>Player</span><span>Distance</span><span>Accuracy</span></div>
         <div class="brow"><span class="rank">1</span><span>[PLAYER]</span><span>[DISTANCE]</span><span>[ACCURACY]</span></div>
@@ -447,7 +447,7 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
         <span class="eyebrow">meet sly</span>
         <h2 class="h2" id="sly-h">The last thing still running</h2>
         <p class="lead">The world is ending. A darkness called the Hollow is swallowing the forests, the mountains, the ground itself. Something lives inside it, and it's hungry. Sly is the last thing still running.</p>
-        <a class="btn" href="about/">Read Sly's story</a>
+        <a class="btn" href="#sly">Read Sly's story</a>
       </div>
       <div class="band-fox" aria-hidden="true"><svg class="fx-delay" viewBox="0 0 240 240"><use href="#foxArt"/></svg></div>
     </div>
@@ -502,7 +502,7 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
       </nav>
       <nav class="fcol" aria-label="Story">
         <h3>Story</h3>
-        <a href="about/">About Sly</a>
+        <a href="#sly">About Sly</a>
         <a href="#sly">The Hollow</a>
         <a href="#fair">Fair at any speed</a>
         <a href="#behind">Behind the game</a>
@@ -597,9 +597,9 @@ a:focus-visible{outline:2px solid var(--orange-hi);outline-offset:3px}
   var CONFIG = {
     GAME_URL: "play/",          // the play page: "Press space to start" and every Play link open it. Empty: Sly just hops.
     SHOW_LEADERBOARD: false,   // true once the leaderboard backend works
-    SHOW_PROFILE: true,        // false hides the profile icon and footer link
+    SHOW_PROFILE: false,       // false hides the profile icon and footer link
     DEVPOST_URL: "",           // empty links are hidden
-    GITHUB_URL: "",
+    GITHUB_URL: "https://github.com/nowhereware/slyrun",
     ITCH_URL: ""
   };
   var GAME_URL = CONFIG.GAME_URL;
