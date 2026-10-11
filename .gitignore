@@ -23,3 +23,18 @@ mono_crash.*.json
 *.exe
 # Uncomment if your project does not version PCK files as runtime dependencies.
 # *.pck
+
+# Web export output (see export_presets.cfg)
+build/
+
+# OS / tooling
+.DS_Store
+__pycache__/
+
+# Claude / AI tooling (local only)
+Claude/
+.claude/
+CLAUDE.md
+CLAUDE.local.md
+SKILL.md
+**/skills/**/*.md
